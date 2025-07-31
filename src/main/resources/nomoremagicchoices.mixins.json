@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.nomoremagicchoices.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "SpellBarOverlayMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
