@@ -20,6 +20,7 @@ public class ModKeyMapping {
     public static final Lazy<KeyMapping> SKILL_3 = Lazy.of(() -> new SkillKey("key.nomoremagicchoices.skill3", 3,51, SKILL_CATEGORY));
     public static final Lazy<KeyMapping> SKILL_4 = Lazy.of(() -> new SkillKey("key.nomoremagicchoices.skill4", 4,52, SKILL_CATEGORY));
 
+    public static final Lazy<KeyMapping> CHANG_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.change_group", 54, SKILL_CATEGORY));
 
     @SubscribeEvent
     public static void onRegister(RegisterKeyMappingsEvent event) {
@@ -27,9 +28,20 @@ public class ModKeyMapping {
         event.register(SKILL_2.get());
         event.register(SKILL_3.get());
         event.register(SKILL_4.get());
+        event.register(CHANG_GROUP.get());
     }
 
+    public static boolean isAnySkillKeyBoundToNumber() {
+        int key1 = ModKeyMapping.SKILL_1.get().getKey().getValue();
+        int key2 = ModKeyMapping.SKILL_2.get().getKey().getValue();
+        int key3 = ModKeyMapping.SKILL_3.get().getKey().getValue();
+        int key4 = ModKeyMapping.SKILL_4.get().getKey().getValue();
 
-
+        return isNumberKey(key1) || isNumberKey(key2) ||
+                isNumberKey(key3) || isNumberKey(key4);
+    }
+    public static boolean isNumberKey(int keyCode) {
+        return keyCode >= 49 && keyCode <= 57; // 49='1', 57='9'
+    }
 
 }

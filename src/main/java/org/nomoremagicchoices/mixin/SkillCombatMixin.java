@@ -6,8 +6,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.player.ClientInput;
+import org.nomoremagicchoices.player.ModKeyMapping;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(value = Minecraft.class,priority = 999)
@@ -33,12 +35,17 @@ public class SkillCombatMixin {
                 ClientInput.setHasWeapon(false);
             }
 
-            return !hasSkillWeaponTag;
+            // 只有当技能键绑定到数字键时才拦截物品栏切换
+            boolean shouldIntercept = hasSkillWeaponTag && ModKeyMapping.isAnySkillKeyBoundToNumber();
+            return !shouldIntercept;
         }
 
 
         return true;
     }
 
+
+    //拦截原版右键
+    //拦截原版q，f，c键
 
 }

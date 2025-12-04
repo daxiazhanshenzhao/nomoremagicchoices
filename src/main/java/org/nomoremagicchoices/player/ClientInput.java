@@ -5,11 +5,14 @@ import io.redspace.ironsspellbooks.network.casting.QuickCastPacket;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
 
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.nomoremagicchoices.Nomoremagicchoices;
+import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.gui.SpellSelectionLayerV1;
 
 import java.util.List;
@@ -36,8 +39,32 @@ public class ClientInput {
         Nomoremagicchoices.LOGGER.info("haha");
 
         handleSkill();
+        handleGroup();
 
+    }
 
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        handlePlayerHand();
+    }
+
+    public static void handleGroup() {
+        if (ModKeyMapping.CHANG_GROUP.get().consumeClick()){
+            SpellSelectionLayerV1.nextGroup();
+        }
+    }
+
+    public static void handlePlayerHand(){
+        var mc = Minecraft.getInstance();
+        if (mc.player != null) {
+
+            boolean hasSkillWeaponTag = mc.player.getMainHandItem().is(TagInit.SKILL_WEAPON);
+            if (hasSkillWeaponTag) {
+                hasWeapon = true;
+            } else {
+                hasWeapon = false;
+            }
+        }
     }
 
     public static void handleSkill(){
@@ -68,7 +95,13 @@ public class ClientInput {
         }
     }
 
+    public static boolean getHasWeapon() {
+        return hasWeapon;
+    }
+
     public static void setHasWeapon(boolean hasWeapon) {
         ClientInput.hasWeapon = hasWeapon;
     }
+
+
 }
