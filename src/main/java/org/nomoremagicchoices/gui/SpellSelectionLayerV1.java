@@ -13,7 +13,7 @@ import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.nomoremagicchoices.Nomoremagicchoices;
-import org.nomoremagicchoices.player.ClientInput;
+import org.nomoremagicchoices.api.handle.ClientInputHandle;
 import org.nomoremagicchoices.player.ModKeyMapping;
 
 import java.util.List;
@@ -148,7 +148,7 @@ public class SpellSelectionLayerV1 implements LayeredDraw.Layer {
         }
 
         // 渲染按键名称
-        if (ClientInput.getHasWeapon()){
+        if (ClientInputHandle.getHasWeapon()){
             renderKeyName(guiGraphics, index, x, y);
         }
 

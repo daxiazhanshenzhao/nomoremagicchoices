@@ -1,4 +1,4 @@
-package org.nomoremagicchoices.player;
+package org.nomoremagicchoices.api.handle;
 
 import io.redspace.ironsspellbooks.api.magic.SpellSelectionManager;
 import io.redspace.ironsspellbooks.network.casting.QuickCastPacket;
@@ -14,11 +14,13 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.gui.SpellSelectionLayerV1;
+import org.nomoremagicchoices.player.KeyState;
+import org.nomoremagicchoices.player.ModKeyMapping;
 
 import java.util.List;
 
 @EventBusSubscriber
-public class ClientInput {
+public class ClientInputHandle {
 
     private static final KeyState SKILL_1 = getKeyState(ModKeyMapping.SKILL_1.get());
     private static final KeyState SKILL_2 = getKeyState(ModKeyMapping.SKILL_2.get());
@@ -100,7 +102,7 @@ public class ClientInput {
     }
 
     public static void setHasWeapon(boolean hasWeapon) {
-        ClientInput.hasWeapon = hasWeapon;
+        ClientInputHandle.hasWeapon = hasWeapon;
     }
 
 

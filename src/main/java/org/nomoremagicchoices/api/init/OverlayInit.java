@@ -19,7 +19,7 @@ public class OverlayInit {
         event.registerBelow(
             VanillaGuiLayers.EXPERIENCE_BAR,
             ResourceLocation.fromNamespaceAndPath(Nomoremagicchoices.MODID, "spell_selection"),
-            new SpellSelectionProvider()
+            SpellSelectionProvider.instance
         );
     }
 }

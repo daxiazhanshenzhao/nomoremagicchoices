@@ -5,11 +5,10 @@ import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
 import org.nomoremagicchoices.api.init.TagInit;
-import org.nomoremagicchoices.player.ClientInput;
+import org.nomoremagicchoices.api.handle.ClientInputHandle;
 import org.nomoremagicchoices.player.ModKeyMapping;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(value = Minecraft.class,priority = 999)
@@ -30,9 +29,9 @@ public class SkillCombatMixin {
 
             boolean hasSkillWeaponTag = mc.player.getMainHandItem().is(TagInit.SKILL_WEAPON);
             if (hasSkillWeaponTag) {
-                ClientInput.setHasWeapon(true);
+                ClientInputHandle.setHasWeapon(true);
             } else {
-                ClientInput.setHasWeapon(false);
+                ClientInputHandle.setHasWeapon(false);
             }
 
             // 只有当技能键绑定到数字键时才拦截物品栏切换
