@@ -38,10 +38,8 @@ public class ClientInputHandle {
 
     @SubscribeEvent
     public static void onClientClick(InputEvent.Key event){
-        Nomoremagicchoices.LOGGER.info("haha");
-
         handleSkill();
-        handleGroup();
+        // handleGroup(); // 注释掉：避免消耗consumeClick事件，由ClientScrollData.handleRunning()处理
 
     }
 
@@ -50,6 +48,7 @@ public class ClientInputHandle {
         handlePlayerHand();
     }
 
+    // 已移至 ClientScrollData.handleRunning() 处理，避免重复消耗按键事件
     public static void handleGroup() {
         if (ModKeyMapping.CHANG_GROUP.get().consumeClick()){
             SpellSelectionLayerV1.nextGroup();

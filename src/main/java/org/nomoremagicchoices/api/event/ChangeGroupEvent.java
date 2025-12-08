@@ -31,4 +31,7 @@ public class ChangeGroupEvent extends Event implements ICancellableEvent {
     public void setNewGroup(int newGroup) {
         this.newGroup = newGroup;
     }
+
+
+
 }

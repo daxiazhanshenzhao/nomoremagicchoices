@@ -18,29 +18,29 @@ public class SpellSelectionHandle {
 
     @SubscribeEvent
     public static void handle(ClientTickEvent.Post event) {
-        Minecraft mc = Minecraft.getInstance();
-
-
-        if (mc.player != null) {
-            var player = mc.player;
-
-            var layer = SpellSelectionProvider.instance.getCustomLayer();
-            var state = layer.getSpellSelectionState();
-
-            var mainHand = player.getMainHandItem();
-
-
-            if (mainHand.isEmpty() && player.getOffhandItem().isEmpty()) {
-                state = SpellSelectionState.EmptyHand;
-            } else if (mainHand.is(TagInit.SKILL_WEAPON)) {
-                state = SpellSelectionState.Weapon;
-            } else if (player.getMainHandItem().has(ComponentRegistry.CASTING_IMPLEMENT) ||player.getOffhandItem().has(ComponentRegistry.CASTING_IMPLEMENT)) {
-                state = SpellSelectionState.Staff;
-            }
-            layer.setSpellSelectionState(state);
-
-
-        }
+//        Minecraft mc = Minecraft.getInstance();
+//
+//
+//        if (mc.player != null) {
+//            var player = mc.player;
+//
+//            var layer = SpellSelectionProvider.instance.getCustomLayer();
+//            var state = layer.getSpellSelectionState();
+//
+//            var mainHand = player.getMainHandItem();
+//
+//
+//            if (mainHand.isEmpty() && player.getOffhandItem().isEmpty()) {
+//                state = SpellSelectionState.EmptyHand;
+//            } else if (mainHand.is(TagInit.SKILL_WEAPON)) {
+//                state = SpellSelectionState.Weapon;
+//            } else if (player.getMainHandItem().has(ComponentRegistry.CASTING_IMPLEMENT) ||player.getOffhandItem().has(ComponentRegistry.CASTING_IMPLEMENT)) {
+//                state = SpellSelectionState.Staff;
+//            }
+//            layer.setSpellSelectionState(state);
+//
+//
+//        }
+//    }
     }
-
 }
