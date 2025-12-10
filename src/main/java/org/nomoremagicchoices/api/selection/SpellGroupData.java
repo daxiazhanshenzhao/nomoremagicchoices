@@ -190,4 +190,45 @@ public class SpellGroupData {
 
         return false;
     }
+
+    /**
+     * 检测并同步当前选中的法术到对应的组
+     * 当玩家通过SpellWheelOverlay或其他方式改变makeSelection时，
+     * 这个方法会检测到变化并自动切换currentGroup到选中法术所在的组
+     *
+     * @return 如果检测到变化并成功切换组返回true，否则返回false
+     */
+    public boolean syncGroupFromSelection() {
+        // 获取SpellSelectionManager
+        var spellSelectionManager = ClientMagicData.getSpellSelectionManager();
+
+        // 获取当前选中的法术索引
+        int selectedIndex = spellSelectionManager.getSelectionIndex();
+
+        // 如果索引无效，返回false
+        if (selectedIndex < 0 || selectedIndex >= allSpells.size()) {
+            return false;
+        }
+
+        // 计算选中法术所在的组索引
+        int targetGroupIndex = selectedIndex / SPELLS_PER_GROUP;
+
+        // 如果已经是当前组，不需要切换
+        if (targetGroupIndex == this.currentGroupIndex) {
+            return false;
+        }
+
+        // 切换到目标组（不触发selectFirstSpellOfCurrentGroup，避免循环）
+        ChangeGroupEvent event = new ChangeGroupEvent(this, this.currentGroupIndex, targetGroupIndex);
+
+        // 如果事件被取消，返回false
+        if (NeoForge.EVENT_BUS.post(event).isCanceled()) {
+            return false;
+        }
+
+        int validatedIndex = event.getNewGroup();
+        this.currentGroupIndex = Math.clamp(validatedIndex, 0, Math.max(0, groupCount - 1));
+
+        return true;
+    }
 }

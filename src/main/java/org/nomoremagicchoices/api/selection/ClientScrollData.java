@@ -53,6 +53,7 @@ public class ClientScrollData {
         handleCurrentTick();
         handleWightTick();
         handleState();
+        handleSelectionSync(); // 检测法术选择变化并同步组
     }
 
     /**
@@ -136,6 +137,26 @@ public class ClientScrollData {
     private static void handleWightTick() {
         if (spellWightList == null) return;
         spellWightList.forEach(ScrollSpellWight::tick);
+    }
+
+    /**
+     * 处理法术选择同步
+     * 检测玩家通过SpellWheelOverlay或其他方式改变法术选择时，自动切换currentGroup
+     */
+    private static void handleSelectionSync() {
+        if (spellWightList == null || spellWightList.isEmpty()) return;
+
+        // 尝试同步组索引
+        boolean groupChanged = SpellGroupData.instance.syncGroupFromSelection();
+
+        // 如果组发生了变化，需要触发Widget重排
+        if (groupChanged) {
+            int newGroupIndex = SpellGroupData.instance.getCurrentGroupIndex();
+            Nomoremagicchoices.LOGGER.info("检测到法术选择变化，切换到组: " + newGroupIndex);
+
+            // 执行切换动画（将新的currentGroup移到列表开头）
+            switchToGroup(newGroupIndex);
+        }
     }
 
     /**
