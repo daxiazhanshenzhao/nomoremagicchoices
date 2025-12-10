@@ -1,5 +1,13 @@
 {
   "itemGroup.nomoremagicchoices": "Example Mod Tab",
   "block.nomoremagicchoices.example_block": "Example Block",
-  "item.nomoremagicchoices.example_item": "Example Item"
+  "item.nomoremagicchoices.example_item": "Example Item",
+  "key.categories.nomoremagicchoices": "No More Magic Choices",
+  "key.nomoremagicchoices.change_group": "Change Spell Group (Next)",
+  "key.nomoremagicchoices.next_group": "Next Spell Group",
+  "key.nomoremagicchoices.prev_group": "Previous Spell Group",
+  "key.nomoremagicchoices.skill1": "Cast Spell 1",
+  "key.nomoremagicchoices.skill2": "Cast Spell 2",
+  "key.nomoremagicchoices.skill3": "Cast Spell 3",
+  "key.nomoremagicchoices.skill4": "Cast Spell 4"
 }

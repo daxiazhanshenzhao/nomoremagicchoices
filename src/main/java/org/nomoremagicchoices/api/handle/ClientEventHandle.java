@@ -19,13 +19,13 @@ public class ClientEventHandle {
 
     }
 
-    @SubscribeEvent
-    public static void onRenderGuiPost(RenderGuiEvent.Pre event) {
-        if (event.getPartialTick().getRealtimeDeltaTicks()> 0f){
-            ClientScrollData.renderHandle(event.getGuiGraphics(),event.getPartialTick());
-        }
-
-    }
+//    @SubscribeEvent
+//    public static void onRenderGuiPost(RenderGuiEvent.Pre event) {
+//        if (event.getPartialTick().getRealtimeDeltaTicks()> 0f){
+//            ClientScrollData.renderHandle(event.getGuiGraphics(),event.getPartialTick());
+//        }
+//
+//    }
 
 
 

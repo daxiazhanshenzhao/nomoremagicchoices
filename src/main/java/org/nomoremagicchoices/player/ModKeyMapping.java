@@ -21,6 +21,8 @@ public class ModKeyMapping {
     public static final Lazy<KeyMapping> SKILL_4 = Lazy.of(() -> new SkillKey("key.nomoremagicchoices.skill4", 4,52, SKILL_CATEGORY));
 
     public static final Lazy<KeyMapping> CHANG_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.change_group", 54, SKILL_CATEGORY));
+    public static final Lazy<KeyMapping> NEXT_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.next_group", 262, SKILL_CATEGORY)); // Right Arrow
+    public static final Lazy<KeyMapping> PREV_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.prev_group", 263, SKILL_CATEGORY)); // Left Arrow
 
     @SubscribeEvent
     public static void onRegister(RegisterKeyMappingsEvent event) {
@@ -29,6 +31,8 @@ public class ModKeyMapping {
         event.register(SKILL_3.get());
         event.register(SKILL_4.get());
         event.register(CHANG_GROUP.get());
+        event.register(NEXT_GROUP.get());
+        event.register(PREV_GROUP.get());
     }
 
     public static boolean isAnySkillKeyBoundToNumber() {

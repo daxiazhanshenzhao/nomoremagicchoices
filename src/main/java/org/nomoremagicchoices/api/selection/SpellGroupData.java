@@ -68,8 +68,14 @@ public class SpellGroupData {
             return;
         }
 
+        int oldIndex = this.currentGroupIndex;
         int validatedIndex = event.getNewGroup();
         this.currentGroupIndex = Math.clamp(validatedIndex, 0, Math.max(0, groupCount - 1));
+
+        // 如果索引确实改变了，自动选中新组的第一个法术
+        if (oldIndex != this.currentGroupIndex) {
+            selectFirstSpellOfCurrentGroup();
+        }
     }
 
     /**
@@ -137,5 +143,51 @@ public class SpellGroupData {
      */
     public static int getSpellsPerGroup() {
         return SPELLS_PER_GROUP;
+    }
+
+    /**
+     * 将当前组的第一个法术设置为Iron's Spellbooks的选中法术
+     * 此方法会查找当前组第一个法术在SpellSelectionManager中的索引，
+     * 并调用makeSelection将其设置为当前选中的法术
+     *
+     * @return 如果成功设置返回true，否则返回false
+     */
+    public boolean selectFirstSpellOfCurrentGroup() {
+        // 获取当前组的法术列表
+        List<SpellData> currentGroupSpells = getCurrentGroupSpells();
+
+        // 检查当前组是否有法术
+        if (currentGroupSpells.isEmpty()) {
+            return false;
+        }
+
+        // 获取第一个法术
+        SpellData firstSpell = currentGroupSpells.getFirst();
+
+        // 检查法术是否为空
+        if (firstSpell == null || firstSpell.equals(SpellData.EMPTY)) {
+            return false;
+        }
+
+        // 获取SpellSelectionManager
+        var spellSelectionManager = ClientMagicData.getSpellSelectionManager();
+
+        // 查找第一个法术在所有法术列表中的索引
+        int targetIndex = -1;
+        for (int i = 0; i < allSpells.size(); i++) {
+            SpellData spellData = allSpells.get(i);
+            if (spellData != null && spellData.equals(firstSpell)) {
+                targetIndex = i;
+                break;
+            }
+        }
+
+        // 如果找到了索引，调用makeSelection
+        if (targetIndex >= 0) {
+            spellSelectionManager.makeSelection(targetIndex);
+            return true;
+        }
+
+        return false;
     }
 }
