@@ -17,7 +17,7 @@ import java.util.List;
 public class ScrollGroupHelper {
 
     /**
-     * 抽书操作：将指定index的法术组抽出到列表末尾（顶层显示）
+     * 抽书操作：将指定index的法术组抽出到列表开头（顶层显示）
      * 就像从书堆中抽出一本书放到最上面，其他书自然下落
      *
      * @param wightList 法术Widget列表
@@ -45,12 +45,12 @@ public class ScrollGroupHelper {
         }
 
         // 将目标Widget从原位置移除，后面的元素前移
-        for (int i = listIndex; i < wightList.size() - 1; i++) {
-            wightList.set(i, wightList.get(i + 1));
+        for (int i = listIndex; i > 0; i--) {
+            wightList.set(i, wightList.get(i - 1));
         }
 
-        // 将目标Widget放到列表末尾（渲染时最后绘制，即在最上层）
-        wightList.set(wightList.size() - 1, targetWight);
+        // 将目标Widget放到列表开头（index=0，显示在最上面）
+        wightList.set(0, targetWight);
 
         // 执行移动动画
         if (isEmptyHand) {
@@ -62,17 +62,18 @@ public class ScrollGroupHelper {
                 Nomoremagicchoices.LOGGER.info("Widget[" + i + "] (groupIndex=" + wight.getGroupIndex() + ") moveDown to (" + targetPos.x + ", " + targetPos.y + ")");
             }
         } else {
-            // 持有物品模式：最后一个（index最高的）移到Focus位置
-            for (int i = 0; i < wightList.size() - 1; i++) {
+            // 持有物品模式：第一个（index=0）移到Focus位置
+            ScrollSpellWight topWight = wightList.getFirst();
+            Vector2i focusPos = positions.getFirst();
+            topWight.moveFocus(focusPos);
+            Nomoremagicchoices.LOGGER.info("顶部Widget[0] (groupIndex=" + topWight.getGroupIndex() + ") moveFocus to (" + focusPos.x + ", " + focusPos.y + ")");
+
+            // 其他Widget移到Down位置
+            for (int i = 1; i < wightList.size(); i++) {
                 ScrollSpellWight wight = wightList.get(i);
                 Vector2i targetPos = positions.get(i);
                 wight.moveDown(targetPos);
             }
-            // 最后一个移到顶部焦点位置
-            ScrollSpellWight topWight = wightList.get(wightList.size() - 1);
-            Vector2i focusPos = positions.get(wightList.size() - 1);
-            topWight.moveFocus(focusPos);
-            Nomoremagicchoices.LOGGER.info("顶部Widget (groupIndex=" + topWight.getGroupIndex() + ") moveFocus to (" + focusPos.x + ", " + focusPos.y + ")");
         }
     }
 

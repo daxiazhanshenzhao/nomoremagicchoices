@@ -23,7 +23,7 @@ public class SpellSelectionLayerV2 implements ILayerState {
             Nomoremagicchoices.MODID, "textures/gui/icons.png");
 
     /** Widget在Y轴的垂直间隔（像素） */
-    public static final int WIDGET_VERTICAL_SPACING = 10;
+    public static final int WIDGET_VERTICAL_SPACING = 8;
 
     /** Focus状态下Widget相对于基础位置的Y轴偏移（像素，负值表示向上） */
     public static final int FOCUS_Y_OFFSET = -50;

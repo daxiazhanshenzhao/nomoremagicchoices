@@ -104,21 +104,20 @@ public class ClientScrollData {
                 Nomoremagicchoices.LOGGER.info("切换到空手: Widget[" + i + "] moveDown to (" + targetPos.x + ", " + targetPos.y + ")");
             }
         } else {
-            // 切换到持有物品：currentGroup应该已经在列表末尾，直接让它移到Focus位置
-            // 不需要重新排序，因为初始化时已经将currentGroup放在末尾了
+            // 切换到持有物品：currentGroup已经在列表开头（index=0），直接让它移到Focus位置
             List<Vector2i> positions = calculatePositions(newState);
 
-            // 最后一个Widget（currentGroup）移到Focus位置
+            // 第一个Widget（currentGroup）移到Focus位置
             if (!spellWightList.isEmpty()) {
-                ScrollSpellWight lastWight = spellWightList.getLast();
-                Vector2i focusPos = positions.get(spellWightList.size() - 1);
-                lastWight.moveFocus(focusPos);
+                ScrollSpellWight firstWight = spellWightList.getFirst();
+                Vector2i focusPos = positions.getFirst();
+                firstWight.moveFocus(focusPos);
 
-                Nomoremagicchoices.LOGGER.info("切换到武器/法杖: Widget[" + (spellWightList.size() - 1) +
-                    "] (groupIndex=" + lastWight.getGroupIndex() + ") moveFocus to (" + focusPos.x + ", " + focusPos.y + ")");
+                Nomoremagicchoices.LOGGER.info("切换到武器/法杖: Widget[0] (groupIndex=" + firstWight.getGroupIndex() +
+                    ") moveFocus to (" + focusPos.x + ", " + focusPos.y + ")");
 
-                // 其他Widget保持在Down位置（它们的位置不变）
-                for (int i = 0; i < spellWightList.size() - 1; i++) {
+                // 其他Widget保持在Down位置
+                for (int i = 1; i < spellWightList.size(); i++) {
                     ScrollSpellWight wight = spellWightList.get(i);
                     Vector2i downPos = positions.get(i);
                     wight.moveDown(downPos);
@@ -272,11 +271,14 @@ public class ClientScrollData {
             tempList.set(i, wight);
         }
 
-        // 将currentGroup移到列表末尾（显示在第一排）
+        // 将currentGroup放到列表开头（显示在最上面）
         spellWightList = NonNullList.withSize(groupCount, ScrollSpellWight.EMPTY);
-        int insertIndex = 0;
 
-        // 先添加非当前组
+        // 第一个位置：当前组（显示在最上面）
+        spellWightList.set(0, tempList.get(currentGroupIndex));
+
+        // 后续位置：其他组（保持相对顺序）
+        int insertIndex = 1;
         for (int i = 0; i < groupCount; i++) {
             if (i != currentGroupIndex) {
                 spellWightList.set(insertIndex, tempList.get(i));
@@ -284,8 +286,6 @@ public class ClientScrollData {
             }
         }
 
-        // 最后添加当前组（在列表末尾）
-        spellWightList.set(groupCount - 1, tempList.get(currentGroupIndex));
 
         // 设置初始状态
         for (int i = 0; i < spellWightList.size(); i++) {
@@ -293,15 +293,15 @@ public class ClientScrollData {
 
             if (state == SpellSelectionState.EmptyHand) {
                 wight.down();
-            } else if (i == groupCount - 1) {
-                // 最后一个（currentGroup）在Focus状态
+            } else if (i == 0) {
+                // 第一个（currentGroup）在Focus状态
                 wight.focus();
             } else {
                 wight.down();
             }
         }
 
-        Nomoremagicchoices.LOGGER.info("初始化了 " + groupCount + " 个法术组Widget，currentGroup=" + currentGroupIndex + " 在列表末尾");
+        Nomoremagicchoices.LOGGER.info("初始化了 " + groupCount + " 个法术组Widget，currentGroup=" + currentGroupIndex + " 在列表开头（index=0）");
 
         return spellWightList;
     }
@@ -329,8 +329,8 @@ public class ClientScrollData {
      * 根据不同状态计算Widget的位置
      *
      * 排列规则：
-     * - 空手状态：列表最后一个Widget（currentGroup）在第一排（最上面），其他Widget从上到下依次排列
-     * - 持有物品状态：列表最后一个Widget（currentGroup）在Focus位置（顶部焦点），其他在底部Down位置
+     * - 空手状态：第一个Widget（index=0, currentGroup）在最上面，其他Widget从上到下依次排列
+     * - 持有物品状态：第一个Widget（index=0, currentGroup）在Focus位置（顶部焦点），其他在底部Down位置
      *
      * @param count Widget数量
      * @param screenWidth 屏幕宽度
@@ -346,22 +346,22 @@ public class ClientScrollData {
         int baseY = screenHeight / 2 + 20;
 
         if (currentState == SpellSelectionState.EmptyHand) {
-            // 空手模式：列表最后一个Widget（currentGroup）在第一排，其他Widget依次向下排列
-            // 注意：由于抽书操作会将currentGroup放到列表末尾，所以最后一个就是currentGroup
+            // 空手模式：第一个Widget（currentGroup）在最上面（baseY），其他Widget依次向下排列
             for (int i = 0; i < count; i++) {
                 int y = baseY + (i * org.nomoremagicchoices.gui.SpellSelectionLayerV2.WIDGET_VERTICAL_SPACING);
                 positions.set(i, new Vector2i(baseX, y));
             }
         } else {
-            // 持有物品模式：最后一个（currentGroup）在顶部（Focus位置），其他在底部
-            for (int i = 0; i < count - 1; i++) {
-                int y = baseY + (i * org.nomoremagicchoices.gui.SpellSelectionLayerV2.WIDGET_VERTICAL_SPACING);
+            // 持有物品模式：第一个（currentGroup）在顶部Focus位置，其他在底部Down位置
+            // 第一个在顶部焦点位置
+            int focusY = baseY + org.nomoremagicchoices.gui.SpellSelectionLayerV2.FOCUS_Y_OFFSET;
+            positions.set(0, new Vector2i(baseX, focusY));
+
+            // 其他Widget在底部
+            for (int i = 1; i < count; i++) {
+                int y = baseY + ((i - 1) * org.nomoremagicchoices.gui.SpellSelectionLayerV2.WIDGET_VERTICAL_SPACING);
                 positions.set(i, new Vector2i(baseX, y));
             }
-
-            // 最后一个在顶部焦点位置
-            int focusY = baseY + org.nomoremagicchoices.gui.SpellSelectionLayerV2.FOCUS_Y_OFFSET;
-            positions.set(count - 1, new Vector2i(baseX, focusY));
         }
 
         return positions;
