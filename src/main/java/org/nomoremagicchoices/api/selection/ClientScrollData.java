@@ -1,6 +1,7 @@
 package org.nomoremagicchoices.api.selection;
 
 import io.redspace.ironsspellbooks.api.spells.SpellData;
+import io.redspace.ironsspellbooks.player.ClientMagicData;
 import io.redspace.ironsspellbooks.registries.ComponentRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
@@ -8,6 +9,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Vector2i;
+import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.event.ChangeSpellEvent;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.gui.SpellSelectionLayerV2;
@@ -33,10 +35,15 @@ public class ClientScrollData {
     private ClientScrollData() {}
 
     public static void tickHandle() {
+        // 更新状态
+        updateState();
+
+        // 处理按键和widget更新
         handleKeyPress();
         updateTick();
         updateWidgets();
-        updateState();
+
+        // 同步选择
         syncSelection();
     }
 
@@ -58,24 +65,59 @@ public class ClientScrollData {
             state = SpellSelectionState.EmptyHand;
         }
 
+        // 状态改变时处理widget位置调整
         if (oldState != state) {
             handleStateChange(state);
         }
     }
 
     private static void handleStateChange(SpellSelectionState newState) {
+        handleStateChangeInternal(newState);
+    }
+
+    private static void handleStateChangeInternal(SpellSelectionState newState) {
         if (spellWightList == null || spellWightList.isEmpty()) return;
+
+        // 获取当前组的索引
+        int currentGroupIndex = SpellGroupData.instance.getCurrentGroupIndex();
+
+        // 找到当前组对应的widget在列表中的位置
+        int currentWidgetListIndex = -1;
+        for (int i = 0; i < spellWightList.size(); i++) {
+            if (spellWightList.get(i).getGroupIndex() == currentGroupIndex) {
+                currentWidgetListIndex = i;
+                break;
+            }
+        }
+
+        // 如果找不到当前组的widget，说明数据不一致，需要重新初始化
+        if (currentWidgetListIndex == -1) {
+            update();
+            return;
+        }
 
         List<Vector2i> positions = calculatePositions(newState);
 
-        if (newState == SpellSelectionState.EmptyHand) {
+        if (newState.isFocus()) {
+            // Focus状态：当前组的Widget移到焦点位置，其他保持在Down位置
             for (int i = 0; i < spellWightList.size(); i++) {
-                spellWightList.get(i).moveDown(positions.get(i));
+                if (i == currentWidgetListIndex) {
+                    // 当前组移到焦点位置
+                    spellWightList.get(i).moveFocus(positions.getFirst());
+                } else {
+                    // 其他widget移到底部，需要计算它们在底部的正确位置
+                    int bottomIndex = (i < currentWidgetListIndex) ? i + 1 : i;
+                    if (bottomIndex < positions.size()) {
+                        spellWightList.get(i).moveDown(positions.get(bottomIndex));
+                    }
+                }
             }
         } else {
-            spellWightList.getFirst().moveFocus(positions.getFirst());
-            for (int i = 1; i < spellWightList.size(); i++) {
-                spellWightList.get(i).moveDown(positions.get(i));
+            // 非Focus状态：所有Widget移到Down位置
+            for (int i = 0; i < spellWightList.size(); i++) {
+                if (i < positions.size()) {
+                    spellWightList.get(i).moveDown(positions.get(i));
+                }
             }
         }
     }
@@ -95,6 +137,11 @@ public class ClientScrollData {
     }
 
     private static void handleKeyPress() {
+        // 如果正在释放技能，不允许切换组
+        if (ClientMagicData.isCasting()) {
+            return;
+        }
+
         boolean nextPressed = ModKeyMapping.NEXT_GROUP.get().consumeClick();
         boolean prevPressed = ModKeyMapping.PREV_GROUP.get().consumeClick();
         boolean changPressed = ModKeyMapping.CHANG_GROUP.get().consumeClick();
@@ -131,8 +178,7 @@ public class ClientScrollData {
 
         if (targetListIndex != -1) {
             List<Vector2i> positions = calculatePositions(state);
-            boolean isEmptyHand = (state == SpellSelectionState.EmptyHand);
-            ScrollGroupHelper.drawWight(spellWightList, targetListIndex, positions, isEmptyHand);
+            ScrollGroupHelper.drawWight(spellWightList, targetListIndex, positions, state.isFocus());
         }
     }
 
@@ -184,9 +230,7 @@ public class ClientScrollData {
 
         for (int i = 0; i < spellWightList.size(); i++) {
             ScrollSpellWight wight = spellWightList.get(i);
-            if (state == SpellSelectionState.EmptyHand) {
-                wight.down();
-            } else if (i == 0) {
+            if (state.isFocus() && i == 0) {
                 wight.focus();
             } else {
                 wight.down();
@@ -226,16 +270,18 @@ public class ClientScrollData {
         int baseY = screenHeight - SpellSelectionLayerV2.BASE_Y_OFFSET_FROM_BOTTOM;
         int spacing = SpellSelectionLayerV2.WIDGET_VERTICAL_SPACING;
 
-        if (currentState == SpellSelectionState.EmptyHand) {
-            for (int i = 0; i < count; i++) {
-                int y = baseY - ((count - 1 - i) * spacing);
-                positions.set(i, new Vector2i(baseX, y));
-            }
-        } else {
+        if (currentState.isFocus()) {
+            // Focus状态：第一个Widget在焦点位置，其他在底部
             int focusY = baseY - ((count - 1) * spacing) + SpellSelectionLayerV2.FOCUS_Y_OFFSET;
             positions.set(0, new Vector2i(baseX, focusY));
 
             for (int i = 1; i < count; i++) {
+                int y = baseY - ((count - 1 - i) * spacing);
+                positions.set(i, new Vector2i(baseX, y));
+            }
+        } else {
+            // 非Focus状态：所有Widget在底部
+            for (int i = 0; i < count; i++) {
                 int y = baseY - ((count - 1 - i) * spacing);
                 positions.set(i, new Vector2i(baseX, y));
             }
@@ -279,5 +325,5 @@ public class ClientScrollData {
             switchToGroup(event.getNewGroup());
         }
     }
-}
 
+}

@@ -17,62 +17,43 @@ import java.util.List;
 public class ScrollGroupHelper {
 
     /**
-     * 抽书操作：将指定index的法术组抽出到列表开头（顶层显示）
-     * 就像从书堆中抽出一本书放到最上面，其他书自然下落
+     * Draws a widget to the front of the list (top layer display).
      *
-     * @param wightList 法术Widget列表
-     * @param listIndex 要抽出的Widget在列表中的索引
-     * @param positions 计算好的目标位置列表
-     * @param isEmptyHand 是否为空手状态
+     * @param wightList Widget list
+     * @param listIndex Index of the widget to draw
+     * @param positions Calculated target positions
+     * @param isFocusState Whether in focus state (Staff/Spellbook)
      */
     public static void drawWight(List<ScrollSpellWight> wightList,
                                   int listIndex,
                                   List<Vector2i> positions,
-                                  boolean isEmptyHand) {
+                                  boolean isFocusState) {
         if (wightList == null || listIndex < 0 || listIndex >= wightList.size() || positions == null) {
-            Nomoremagicchoices.LOGGER.warn("drawWight参数无效: wightList=" + (wightList != null) + ", listIndex=" + listIndex + ", positions=" + (positions != null));
             return;
         }
 
-        Nomoremagicchoices.LOGGER.info("开始抽书操作: listIndex=" + listIndex + ", isEmptyHand=" + isEmptyHand);
-
-        // 获取要抽出的Widget
         ScrollSpellWight targetWight = wightList.get(listIndex);
-
         if (targetWight == null || targetWight == ScrollSpellWight.EMPTY) {
-            Nomoremagicchoices.LOGGER.warn("目标Widget为空或EMPTY，取消操作");
             return;
         }
 
-        // 将目标Widget从原位置移除，后面的元素前移
+        // Move target widget to the front
         for (int i = listIndex; i > 0; i--) {
             wightList.set(i, wightList.get(i - 1));
         }
-
-        // 将目标Widget放到列表开头（index=0，显示在最上面）
         wightList.set(0, targetWight);
 
-        // 执行移动动画
-        if (isEmptyHand) {
-            // 空手模式：所有Widget都使用moveDown方法，保持Down状态相对移动
-            for (int i = 0; i < wightList.size(); i++) {
-                ScrollSpellWight wight = wightList.get(i);
-                Vector2i targetPos = positions.get(i);
-                wight.moveDown(targetPos);
-                Nomoremagicchoices.LOGGER.info("Widget[" + i + "] (groupIndex=" + wight.getGroupIndex() + ") moveDown to (" + targetPos.x + ", " + targetPos.y + ")");
+        // Execute movement animation
+        if (isFocusState) {
+            // Focus state: first widget moves to focus position, others move down
+            wightList.getFirst().moveFocus(positions.getFirst());
+            for (int i = 1; i < wightList.size(); i++) {
+                wightList.get(i).moveDown(positions.get(i));
             }
         } else {
-            // 持有物品模式：第一个（index=0）移到Focus位置
-            ScrollSpellWight topWight = wightList.getFirst();
-            Vector2i focusPos = positions.getFirst();
-            topWight.moveFocus(focusPos);
-            Nomoremagicchoices.LOGGER.info("顶部Widget[0] (groupIndex=" + topWight.getGroupIndex() + ") moveFocus to (" + focusPos.x + ", " + focusPos.y + ")");
-
-            // 其他Widget移到Down位置
-            for (int i = 1; i < wightList.size(); i++) {
-                ScrollSpellWight wight = wightList.get(i);
-                Vector2i targetPos = positions.get(i);
-                wight.moveDown(targetPos);
+            // Non-focus state: all widgets move down
+            for (int i = 0; i < wightList.size(); i++) {
+                wightList.get(i).moveDown(positions.get(i));
             }
         }
     }
@@ -129,7 +110,6 @@ public class ScrollGroupHelper {
         int oldIndex = event.getOldGroup();
         int newIndex = event.getNewGroup();
 
-        Nomoremagicchoices.LOGGER.info("检测到切换组事件: " + oldIndex + " -> " + newIndex);
 
         // 实际的切换逻辑由ClientScrollData处理
         // 这里只是记录日志

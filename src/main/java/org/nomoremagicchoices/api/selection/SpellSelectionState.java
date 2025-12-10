@@ -16,7 +16,7 @@ public enum SpellSelectionState {
         return value;
     }
 
-    public boolean renderBg(){
-        return this != EmptyHand;
+    public boolean isFocus(){
+        return (this == Weapon) || (this == Staff) || (this == Spellbook);
     }
 }

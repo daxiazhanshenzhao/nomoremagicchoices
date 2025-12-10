@@ -83,7 +83,27 @@ public class ScrollSpellWight implements IMoveWight{
      * 空手模式下使用此方法
      */
     public void moveDown(Vector2i ender) {
+        // 如果正在移动，检查目标是否改变
         if (state.equals(State.Moving)) {
+            // 如果目标位置和目标状态都没变，不需要重新移动
+            if (this.ender.equals(ender) && this.targetState == State.Down) {
+                return;
+            }
+            // 目标改变了，需要重新开始移动
+            // 1. 计算当前实际位置（基于当前offset）
+            double realOffset = getRealOffset(offset);
+            int currentX = getXPosition(realOffset);
+            int currentY = getYPosition(realOffset);
+
+            // 2. 将当前实际位置设为新的起点
+            this.center.set(currentX, currentY);
+
+            // 3. 设置新的目标位置和状态
+            this.ender = new Vector2i(ender);
+            this.targetState = State.Down;
+
+            // 4. 重置offset，从当前位置重新开始移动
+            setOffset(0);
             return;
         }
 
@@ -100,15 +120,28 @@ public class ScrollSpellWight implements IMoveWight{
      * 持有物品模式下，将选中的法术组移到顶部时使用此方法
      */
     public void moveFocus(Vector2i ender) {
+        // 如果正在移动，检查目标是否改变
         if (state.equals(State.Moving)) {
+            // 如果目标位置和目标状态都没变，不需要重新移动
+            if (this.ender.equals(ender) && this.targetState == State.Focus) {
+                return;
+            }
+            // 目标改变了，需要重新开始移动
+            double realOffset = getRealOffset(offset);
+            int currentX = getXPosition(realOffset);
+            int currentY = getYPosition(realOffset);
+
+            this.center.set(currentX, currentY);
+            this.ender = new Vector2i(ender);
+            this.targetState = State.Focus;
+            setOffset(0);
             return;
         }
 
         this.ender = new Vector2i(ender);
         setOffset(0);
         state = State.Moving;
-        targetState = State.Focus; // 明确设置目标状态为Focus
-
+        targetState = State.Focus;
     }
 
 
@@ -121,13 +154,8 @@ public class ScrollSpellWight implements IMoveWight{
 
             // 移动完成后更新状态和位置
             if (offset >= 1.0){
-                // 精确设置为1.0，避免浮点数误差
                 setOffset(1.0);
-
-                // 使用预设的目标状态，而不是重新判断
                 state = targetState;
-
-                // 更新中心位置为目标位置
                 this.center.set(ender);
                 setOffset(0);
 
@@ -173,7 +201,7 @@ public class ScrollSpellWight implements IMoveWight{
                 case Focus:
                     // 渲染Focus状态的法术，使用Focus间隔（更宽松）
                     renderSlot(context, spellData, center.x + slotOffsetX-3, center.y);
-                    renderKey(context, slotIndex, center.x + slotOffsetX-3, center.y -14+2);
+                    renderKey(context, slotIndex, center.x + slotOffsetX-3, center.y -14+2+3);
                     break;
             }
 
@@ -332,6 +360,7 @@ public class ScrollSpellWight implements IMoveWight{
     public void focus(){
         this.state = State.Focus;
     }
+
 
     /**
      * 法术图标的显示状态枚举

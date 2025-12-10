@@ -1,6 +1,7 @@
 package org.nomoremagicchoices.api.handle;
 
 import io.redspace.ironsspellbooks.api.magic.SpellSelectionManager;
+import io.redspace.ironsspellbooks.network.casting.CancelCastPacket;
 import io.redspace.ironsspellbooks.network.casting.QuickCastPacket;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
 
@@ -11,8 +12,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.gui.SpellSelectionLayerV1;
 import org.nomoremagicchoices.player.KeyState;
@@ -42,6 +43,28 @@ public class ClientInputHandle {
         handleSkill();
         // handleGroup(); // 注释掉：避免消耗consumeClick事件，由ClientScrollData.handleRunning()处理
 
+    }
+
+    /**
+     * 处理滚轮事件
+     * 只在持有技能武器/法杖且正在施法时取消滚轮切换物品栏
+     * 这样可以防止施法期间误操作切换物品导致施法中断
+     * 同时允许其他情况下（如空手、持有普通物品）正常使用滚轮
+     */
+    @SubscribeEvent
+    public static void scrollEvent(InputEvent.MouseScrollingEvent event){
+
+        if (true) return;
+        // 只在施法期间取消滚轮输入，防止切换物品栏导致施法中断
+        if (ClientMagicData.isCasting()) {
+            event.setCanceled(true);
+        }
+    }
+    @SubscribeEvent
+    public static void rightClick(PlayerInteractEvent.RightClickItem event){
+        if (ClientMagicData.isCasting()) {
+            PacketDistributor.sendToServer(new CancelCastPacket(true));
+        }
     }
 
     @SubscribeEvent
@@ -74,7 +97,10 @@ public class ClientInputHandle {
 
         for (KeyState key : keys){
             if (key.wasPressed() && hasWeapon){
-                int i = keys.indexOf(key) + SpellSelectionLayerV1.getCurrentGroup()*4;
+                // 使用 SpellGroupData 获取当前组索引，确保与 ClientScrollData 同步
+                int currentGroupIndex = org.nomoremagicchoices.api.selection.SpellGroupData.instance.getCurrentGroupIndex();
+                int slotIndexInGroup = keys.indexOf(key);
+                int i = slotIndexInGroup + currentGroupIndex * 4;
 
                 SpellSelectionManager spellSelectionManager = ClientMagicData.getSpellSelectionManager();
                 if (!ClientMagicData.isCasting()&& (ClientMagicData.getCooldownPercent(ClientMagicData.getSpellSelectionManager().getSpellData(i).getSpell()) <=0)  ) {

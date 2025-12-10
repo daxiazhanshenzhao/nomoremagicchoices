@@ -2,7 +2,13 @@ package org.nomoremagicchoices.api.selection;
 
 import io.redspace.ironsspellbooks.api.spells.SpellData;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
+import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.event.ChangeGroupEvent;
 
 import java.util.ArrayList;
@@ -20,6 +26,18 @@ public class SpellGroupData {
     // 存储所有法术的列表
     private List<SpellData> allSpells;
 
+    // 记录上一次非施法状态下的选择索引，用于避免施法期间的错误同步
+    private int lastValidSelectionIndex = -1;
+
+    // 标记是否已经初始化过选择索引
+    private boolean selectionInitialized = false;
+
+    // 记录上一次的施法状态
+    private boolean wasCasting = false;
+
+    // 记录施法开始时的索引
+    private int indexBeforeCasting = -1;
+
     // 单例实例
     public static SpellGroupData instance = new SpellGroupData();
 
@@ -35,8 +53,21 @@ public class SpellGroupData {
     public void updateSpells() {
         var ssm = ClientMagicData.getSpellSelectionManager();
 
+        // SpellSelectionManager可能在游戏初始化早期为null，需要检查
+        if (ssm == null) return;
+
         // 从 SpellSelectionManager 获取所有法术
-        this.allSpells = ssm.getAllSpells().stream()
+        // 过滤掉null元素，避免NullPointerException
+        var allSpellsList = ssm.getAllSpells();
+        if (allSpellsList == null) {
+            this.allSpells = new ArrayList<>();
+            groupCount = 0;
+            this.currentGroupIndex = 0;
+            return;
+        }
+
+        this.allSpells = allSpellsList.stream()
+                .filter(slot -> slot != null && slot.spellData != null && !slot.spellData.equals(SpellData.EMPTY))
                 .map(slot -> slot.spellData)
                 .collect(Collectors.toList());
 
@@ -54,6 +85,10 @@ public class SpellGroupData {
         } else if (groupCount == 0) {
             this.currentGroupIndex = 0;
         }
+
+        // 重置选择初始化标记，允许下一次同步重新初始化
+        selectionInitialized = false;
+        lastValidSelectionIndex = -1;
     }
 
     /**
@@ -172,6 +207,11 @@ public class SpellGroupData {
         // 获取SpellSelectionManager
         var spellSelectionManager = ClientMagicData.getSpellSelectionManager();
 
+        // SpellSelectionManager可能在游戏初始化早期为null
+        if (spellSelectionManager == null) {
+            return false;
+        }
+
         // 查找第一个法术在所有法术列表中的索引
         int targetIndex = -1;
         for (int i = 0; i < allSpells.size(); i++) {
@@ -196,27 +236,100 @@ public class SpellGroupData {
      * 当玩家通过SpellWheelOverlay或其他方式改变makeSelection时，
      * 这个方法会检测到变化并自动切换currentGroup到选中法术所在的组
      *
+     * 关键：施法期间不同步索引变化，因为施法时getSelectionIndex()返回正在释放的法术索引，
+     * 而不是玩家实际选择的索引，这会导致错误的组切换
+     *
      * @return 如果检测到变化并成功切换组返回true，否则返回false
      */
     public boolean syncGroupFromSelection() {
         // 获取SpellSelectionManager
         var spellSelectionManager = ClientMagicData.getSpellSelectionManager();
 
+        // SpellSelectionManager可能在游戏初始化早期为null
+        if (spellSelectionManager == null) {
+            return false;
+        }
+
         // 获取当前选中的法术索引
         int selectedIndex = spellSelectionManager.getSelectionIndex();
+        boolean isCasting = ClientMagicData.isCasting();
 
         // 如果索引无效，返回false
         if (selectedIndex < 0 || selectedIndex >= allSpells.size()) {
+            wasCasting = isCasting;
             return false;
         }
 
-        // 计算选中法术所在的组索引
+        // 初始化检查：第一次调用时直接记录当前索引，不执行切换
+        if (!selectionInitialized) {
+            // 如果正在施法，延迟初始化，避免记录错误的索引
+            if (isCasting) {
+                wasCasting = true;
+                return false;
+            }
+            lastValidSelectionIndex = selectedIndex;
+            selectionInitialized = true;
+            wasCasting = false;
+            return false;
+        }
+
+        // 关键保护：施法状态跟踪
+        // 如果从非施法状态进入施法状态，记录施法前的索引
+        if (!wasCasting && isCasting) {
+            indexBeforeCasting = lastValidSelectionIndex;
+        }
+
+        // 如果从施法状态结束，并且索引发生了变化
+        // 这种变化很可能是Iron's Spellbooks的内部行为，不是玩家主动选择
+        if (wasCasting && !isCasting) {
+            // 如果施法结束后索引变化了，忽略这个变化
+            if (selectedIndex != indexBeforeCasting) {
+                // 恢复施法前的索引记录，不切换组
+                lastValidSelectionIndex = indexBeforeCasting;
+                wasCasting = false;
+                indexBeforeCasting = -1;
+                return false;
+            }
+        }
+
+        // 更新施法状态
+        wasCasting = isCasting;
+
+        // 先计算目标组，用于更精确的判断
         int targetGroupIndex = selectedIndex / SPELLS_PER_GROUP;
+        int lastGroupIndex = lastValidSelectionIndex >= 0 ? lastValidSelectionIndex / SPELLS_PER_GROUP : -1;
 
-        // 如果已经是当前组，不需要切换
-        if (targetGroupIndex == this.currentGroupIndex) {
+        // 检查索引是否真正改变了
+        // 如果索引和上次记录的一样，说明没有真正的选择变化
+        if (lastValidSelectionIndex == selectedIndex) {
             return false;
         }
+
+        // 关键保护1：如果正在施法，索引变化是因为施法，不是玩家主动选择
+        // 忽略这个变化，不更新lastValidSelectionIndex，也不切换组
+        if (isCasting) {
+            return false;
+        }
+
+        // 关键保护2：如果索引变化了，但目标组和当前组相同
+        // 说明这可能是组内法术切换或施法结束后的索引恢复，不应该触发组切换
+        if (targetGroupIndex == this.currentGroupIndex) {
+            // 更新记录的索引，但不切换组
+            lastValidSelectionIndex = selectedIndex;
+            return false;
+        }
+
+        // 关键保护3：如果上次记录的组索引和目标组索引相同
+        // 说明玩家只是在同一组内切换法术，不应该触发组切换
+        if (lastGroupIndex == targetGroupIndex) {
+            // 更新记录的索引，但不切换组
+            lastValidSelectionIndex = selectedIndex;
+            return false;
+        }
+
+        // 只有在非施法状态下，且索引变化导致组变化时，才被认为是玩家的主动选择
+        // 更新记录的索引
+        lastValidSelectionIndex = selectedIndex;
 
         // 切换到目标组（不触发selectFirstSpellOfCurrentGroup，避免循环）
         ChangeGroupEvent event = new ChangeGroupEvent(this, this.currentGroupIndex, targetGroupIndex);
@@ -230,5 +343,7 @@ public class SpellGroupData {
         this.currentGroupIndex = Math.clamp(validatedIndex, 0, Math.max(0, groupCount - 1));
 
         return true;
+
     }
+
 }
