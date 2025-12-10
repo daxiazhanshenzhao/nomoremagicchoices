@@ -9,9 +9,18 @@ public class RenderBgEvent extends Event implements ICancellableEvent {
 
 
     private ResourceLocation texture;
-    private int x, y, width, height,uOffset,vOffset;
+    private int x, y, width, height,uOffset,vOffset,textureWidth,textureHeight;
 
-    public RenderBgEvent(ResourceLocation texture, GuiGraphics context, int x, int y, int uOffset, int vOffset, int width, int height) {
+    public RenderBgEvent(ResourceLocation texture, GuiGraphics context, int x, int y, int uOffset, int vOffset, int width, int height,int textureWidth,int textureHeight) {
+        this.texture = texture;
+        this.x = x;
+        this.y = y;
+        this.uOffset = uOffset;
+        this.vOffset = vOffset;
+        this.width = width;
+        this.height = height;
+        this.textureWidth = textureWidth;
+        this.textureHeight = textureHeight;
     }
 
 
@@ -69,5 +78,21 @@ public class RenderBgEvent extends Event implements ICancellableEvent {
 
     public void setvOffset(int vOffset) {
         this.vOffset = vOffset;
+    }
+
+    public int getTextureHeight() {
+        return textureHeight;
+    }
+
+    public int getTextureWidth() {
+        return textureWidth;
+    }
+
+    public void setTextureHeight(int textureHeight) {
+        this.textureHeight = textureHeight;
+    }
+
+    public void setTextureWidth(int textureWidth) {
+        this.textureWidth = textureWidth;
     }
 }

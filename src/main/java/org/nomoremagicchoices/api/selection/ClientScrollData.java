@@ -73,6 +73,8 @@ public class ClientScrollData {
             } else if (player.getMainHandItem().has(ComponentRegistry.CASTING_IMPLEMENT) ||
                        player.getOffhandItem().has(ComponentRegistry.CASTING_IMPLEMENT)) {
                 state = SpellSelectionState.Staff;
+            }else  {
+                state = SpellSelectionState.EmptyHand;
             }
 
             // 状态切换时的处理
@@ -328,9 +330,12 @@ public class ClientScrollData {
      * 内部坐标计算方法
      * 根据不同状态计算Widget的位置
      *
-     * 排列规则：
-     * - 空手状态：第一个Widget（index=0, currentGroup）在最上面，其他Widget从上到下依次排列
-     * - 持有物品状态：第一个Widget（index=0, currentGroup）在Focus位置（顶部焦点），其他在底部Down位置
+     * 排列规则（倒序计算，从下往上）：
+     * - 基准位置：最后一个Widget（index最大）在baseY（靠近屏幕底部）
+     * - 空手状态：第一个Widget（index=0, currentGroup）在最上面，从baseY向上倒序排列
+     * - 持有物品状态：第一个Widget（index=0, currentGroup）在Focus位置，其他从baseY向上倒序排列
+     *
+     * 优势：新增法术时，从底部添加，整体向上移动，不会超出屏幕顶部
      *
      * @param count Widget数量
      * @param screenWidth 屏幕宽度
@@ -341,25 +346,34 @@ public class ClientScrollData {
     private static List<Vector2i> calculatePositionsInternal(int count, int screenWidth, int screenHeight, SpellSelectionState currentState) {
         List<Vector2i> positions = NonNullList.withSize(count, new Vector2i(0, 0));
 
-        // 基础坐标：屏幕中心偏右下
-        int baseX = screenWidth / 2 + 50;
-        int baseY = screenHeight / 2 + 20;
+        // 基础坐标：使用SpellSelectionLayerV2中定义的偏移量
+        // X轴：屏幕中心 + 偏移量
+        int baseX = screenWidth / 2 + org.nomoremagicchoices.gui.SpellSelectionLayerV2.BASE_X_OFFSET;
+        // Y轴：屏幕高度 - 距离底部的距离（最后一个Widget的位置）
+        int baseY = screenHeight - org.nomoremagicchoices.gui.SpellSelectionLayerV2.BASE_Y_OFFSET_FROM_BOTTOM;
 
         if (currentState == SpellSelectionState.EmptyHand) {
-            // 空手模式：第一个Widget（currentGroup）在最上面（baseY），其他Widget依次向下排列
+            // 空手模式：倒序计算，最后一个Widget在baseY，往上依次递减
+            // Widget[0] (currentGroup) 在最上面：baseY - (count-1) * spacing
+            // Widget[count-1] 在最下面：baseY
             for (int i = 0; i < count; i++) {
-                int y = baseY + (i * org.nomoremagicchoices.gui.SpellSelectionLayerV2.WIDGET_VERTICAL_SPACING);
+                // 倒序：从baseY向上减去间距
+                int y = baseY - ((count - 1 - i) * org.nomoremagicchoices.gui.SpellSelectionLayerV2.WIDGET_VERTICAL_SPACING);
                 positions.set(i, new Vector2i(baseX, y));
             }
         } else {
-            // 持有物品模式：第一个（currentGroup）在顶部Focus位置，其他在底部Down位置
-            // 第一个在顶部焦点位置
-            int focusY = baseY + org.nomoremagicchoices.gui.SpellSelectionLayerV2.FOCUS_Y_OFFSET;
+            // 持有物品模式：第一个（currentGroup）在Focus位置，其他从baseY向上倒序排列
+
+            // 第一个在顶部焦点位置（Focus更靠上，所以需要额外减去一个偏移）
+            int focusY = baseY - ((count - 1) * org.nomoremagicchoices.gui.SpellSelectionLayerV2.WIDGET_VERTICAL_SPACING)
+                         + org.nomoremagicchoices.gui.SpellSelectionLayerV2.FOCUS_Y_OFFSET;
             positions.set(0, new Vector2i(baseX, focusY));
 
-            // 其他Widget在底部
+            // 其他Widget从baseY向上倒序排列（index=1在倒数第二个位置）
             for (int i = 1; i < count; i++) {
-                int y = baseY + ((i - 1) * org.nomoremagicchoices.gui.SpellSelectionLayerV2.WIDGET_VERTICAL_SPACING);
+                // index=1: baseY - (count-2) * spacing (倒数第二个)
+                // index=count-1: baseY (最下面)
+                int y = baseY - ((count - 1 - i) * org.nomoremagicchoices.gui.SpellSelectionLayerV2.WIDGET_VERTICAL_SPACING);
                 positions.set(i, new Vector2i(baseX, y));
             }
         }
