@@ -15,4 +15,8 @@ public enum SpellSelectionState {
     public int getValue() {
         return value;
     }
+
+    public boolean renderBg(){
+        return this != EmptyHand;
+    }
 }

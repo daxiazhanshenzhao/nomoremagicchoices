@@ -83,18 +83,22 @@ public class SpellSelectionLayerV2 implements ILayerState {
 
     @Override
     public void renderBg(ResourceLocation texture, GuiGraphics context, int x, int y,int uOffset,int vOffset, int width, int height,int textureWidth,int textureHeight) {
+        if (ClientScrollData.getSpellWightList().isEmpty()) return;
+
+
         RenderBgEvent event = new RenderBgEvent(texture, context, x, y,uOffset, vOffset, width, height,textureWidth,textureHeight);
         NeoForge.EVENT_BUS.post(event);
 
         if (event.isCanceled()) return;
 
-        // blit参数: (纹理, 屏幕X, 屏幕Y, 纹理U, 纹理V, 渲染宽, 渲染高, 纹理总宽, 纹理总高)
-        // 您的bg.png是105×36，完全占满
+
         context.blit(event.getTexture(), event.getX(), event.getY(),
                      event.getuOffset(), event.getvOffset(),
                      event.getWidth(), event.getHeight(),
                      event.getTextureWidth(), event.getTextureHeight());
 
     }
+
+
 }
 

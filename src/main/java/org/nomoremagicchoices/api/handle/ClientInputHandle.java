@@ -4,6 +4,7 @@ import io.redspace.ironsspellbooks.api.magic.SpellSelectionManager;
 import io.redspace.ironsspellbooks.network.casting.QuickCastPacket;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
 
+import io.redspace.ironsspellbooks.registries.ComponentRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -58,13 +59,14 @@ public class ClientInputHandle {
     public static void handlePlayerHand(){
         var mc = Minecraft.getInstance();
         if (mc.player != null) {
+            var mainHand = mc.player.getMainHandItem();
+            var offHand = mc.player.getOffhandItem();
 
-            boolean hasSkillWeaponTag = mc.player.getMainHandItem().is(TagInit.SKILL_WEAPON);
-            if (hasSkillWeaponTag) {
-                hasWeapon = true;
-            } else {
-                hasWeapon = false;
-            }
+            boolean hasSkillWeaponTag = mainHand.is(TagInit.SKILL_WEAPON);
+            boolean hasStaff = mainHand.has(ComponentRegistry.CASTING_IMPLEMENT)
+                            || offHand.has(ComponentRegistry.CASTING_IMPLEMENT);
+
+            hasWeapon = hasSkillWeaponTag || hasStaff;
         }
     }
 

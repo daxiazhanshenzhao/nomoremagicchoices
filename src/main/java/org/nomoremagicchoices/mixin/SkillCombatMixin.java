@@ -2,10 +2,12 @@ package org.nomoremagicchoices.mixin;
 
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import io.redspace.ironsspellbooks.registries.ComponentRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.api.handle.ClientInputHandle;
+import org.nomoremagicchoices.api.selection.ClientScrollData;
 import org.nomoremagicchoices.player.ModKeyMapping;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,7 +29,7 @@ public class SkillCombatMixin {
         var mc = Minecraft.getInstance();
         if (mc.player != null) {
 
-            boolean hasSkillWeaponTag = mc.player.getMainHandItem().is(TagInit.SKILL_WEAPON);
+            boolean hasSkillWeaponTag = mc.player.getMainHandItem().is(TagInit.SKILL_WEAPON) || mc.player.getMainHandItem().has(ComponentRegistry.CASTING_IMPLEMENT);
             if (hasSkillWeaponTag) {
                 ClientInputHandle.setHasWeapon(true);
             } else {
@@ -35,7 +37,7 @@ public class SkillCombatMixin {
             }
 
             // 只有当技能键绑定到数字键时才拦截物品栏切换
-            boolean shouldIntercept = hasSkillWeaponTag && ModKeyMapping.isAnySkillKeyBoundToNumber();
+            boolean shouldIntercept = hasSkillWeaponTag && ModKeyMapping.isAnySkillKeyBoundToNumber() && !ClientScrollData.getSpellWightList().isEmpty();
             return !shouldIntercept;
         }
 

@@ -10,4 +10,5 @@ public interface IMoveWight {
     void moveTo(Vector2i ender);
     void render(GuiGraphics context, DeltaTracker partialTick);
     void tick();
+
 }

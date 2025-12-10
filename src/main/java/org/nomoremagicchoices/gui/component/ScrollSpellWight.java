@@ -4,10 +4,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.redspace.ironsspellbooks.api.spells.SpellData;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2i;
 import org.nomoremagicchoices.Nomoremagicchoices;
+import org.nomoremagicchoices.api.selection.ClientScrollData;
+import org.nomoremagicchoices.api.selection.SpellSelectionState;
+import org.nomoremagicchoices.player.ModKeyMapping;
 
 import java.util.List;
 
@@ -15,6 +19,7 @@ public class ScrollSpellWight implements IMoveWight{
 
     public static final int TOTAL_TICKS = 8;
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Nomoremagicchoices.MODID, "textures/gui/icons.png");
+    public static final ResourceLocation KEY_TEXTURE = ResourceLocation.fromNamespaceAndPath(Nomoremagicchoices.MODID, "textures/gui/keys.png");
     public static final ScrollSpellWight EMPTY = new ScrollSpellWight(new Vector2i(0,0), new Vector2i(0,0), List.of(SpellData.EMPTY), -1);
 
     // 法术槽间隔常量
@@ -53,7 +58,6 @@ public class ScrollSpellWight implements IMoveWight{
     @Override
     public void moveTo(Vector2i ender) {
         if (state.equals(State.Moving)) {
-            Nomoremagicchoices.LOGGER.warn("已经在移动中，忽略此次moveTo调用");
             return;
         }
 
@@ -71,7 +75,6 @@ public class ScrollSpellWight implements IMoveWight{
             targetState = State.Down;
         }
 
-        Nomoremagicchoices.LOGGER.info("开始移动: from (" + center.x + "," + center.y + ") to (" + ender.x + "," + ender.y + "), 目标状态: " + targetState);
     }
 
     /**
@@ -81,7 +84,6 @@ public class ScrollSpellWight implements IMoveWight{
      */
     public void moveDown(Vector2i ender) {
         if (state.equals(State.Moving)) {
-            Nomoremagicchoices.LOGGER.warn("已经在移动中，忽略此次moveDown调用");
             return;
         }
 
@@ -90,7 +92,6 @@ public class ScrollSpellWight implements IMoveWight{
         state = State.Moving;
         targetState = State.Down; // 明确设置目标状态为Down
 
-        Nomoremagicchoices.LOGGER.info("底层移动: from (" + center.x + "," + center.y + ") to (" + ender.x + "," + ender.y + ")");
     }
 
     /**
@@ -100,7 +101,6 @@ public class ScrollSpellWight implements IMoveWight{
      */
     public void moveFocus(Vector2i ender) {
         if (state.equals(State.Moving)) {
-            Nomoremagicchoices.LOGGER.warn("已经在移动中，忽略此次moveFocus调用");
             return;
         }
 
@@ -109,7 +109,6 @@ public class ScrollSpellWight implements IMoveWight{
         state = State.Moving;
         targetState = State.Focus; // 明确设置目标状态为Focus
 
-        Nomoremagicchoices.LOGGER.info("焦点移动: from (" + center.x + "," + center.y + ") to (" + ender.x + "," + ender.y + "), 目标状态: Focus");
     }
 
 
@@ -132,7 +131,6 @@ public class ScrollSpellWight implements IMoveWight{
                 this.center.set(ender);
                 setOffset(0);
 
-                Nomoremagicchoices.LOGGER.info("移动完成，新状态: " + state + ", 位置: (" + center.x + ", " + center.y + ")");
             }
         }
     }
@@ -175,6 +173,7 @@ public class ScrollSpellWight implements IMoveWight{
                 case Focus:
                     // 渲染Focus状态的法术，使用Focus间隔（更宽松）
                     renderSlot(context, spellData, center.x + slotOffsetX-3, center.y);
+                    renderKey(context, slotIndex, center.x + slotOffsetX-3, center.y -14+2);
                     break;
             }
 
@@ -211,12 +210,9 @@ public class ScrollSpellWight implements IMoveWight{
         //绘制冷却框
         if (cooldownPercent <=0){
             if (state.equals(State.Focus)) {
-
                 context.blit(TEXTURE, x, y, 88, 84, 22, 22);
-
             }else {
                 context.blit(TEXTURE, x +1, y + 1, 156, 85, 20, 20);
-
             }
         }
     }
@@ -236,6 +232,95 @@ public class ScrollSpellWight implements IMoveWight{
     }
     private int getYPosition(double realOffset){
         return (int) (center.y + (ender.y - center.y) * realOffset);
+    }
+
+    /**
+     * Renders the key hint for a spell slot.
+     *
+     * @param context Graphics context
+     * @param slotIndex Index of the spell within the group (0-3)
+     * @param x X position
+     * @param y Y position
+     */
+    public void renderKey(GuiGraphics context, int slotIndex, int x, int y) {
+        if (state != State.Focus) return;
+
+        var keyMapping = switch (slotIndex) {
+            case 0 -> ModKeyMapping.SKILL_1.get();
+            case 1 -> ModKeyMapping.SKILL_2.get();
+            case 2 -> ModKeyMapping.SKILL_3.get();
+            case 3 -> ModKeyMapping.SKILL_4.get();
+            default -> null;
+        };
+
+        if (keyMapping == null) return;
+
+        int keyCode = keyMapping.getKey().getValue();
+        BlitContext blitContext = getContext(keyCode);
+
+        if (blitContext.width() > 0 && blitContext.height() > 0) {
+            // 法杖固定显示鼠标右键（第一个法术槽）
+            if (slotIndex == 0 && ClientScrollData.getState().equals(SpellSelectionState.Staff)) {
+                BlitContext rightClickContext = getContext(1);
+                int centerX = x + 11 - rightClickContext.width() / 2;
+                context.blit(KEY_TEXTURE, centerX, y,
+                           rightClickContext.uOffset(), rightClickContext.vOffset(),
+                           rightClickContext.width(), rightClickContext.height());
+            }
+            else if (blitContext.isMouse()) {
+                // 渲染鼠标按键纹理（居中对齐）
+                int centerX = x + 11 - blitContext.width() / 2;
+                context.blit(KEY_TEXTURE, centerX, y,
+                           blitContext.uOffset(), blitContext.vOffset(),
+                           blitContext.width(), blitContext.height());
+            }
+            else {
+                // 渲染键盘按键文字和背景
+                var font = Minecraft.getInstance().font;
+                String keyName = keyMapping.getTranslatedKeyMessage().getString();
+
+                // 计算文字的实际像素宽度
+                int textWidth = font.width(keyName);
+                // 左右边框各3px = 总宽度 + 6px（缩小4像素）
+                int totalBackgroundWidth = textWidth + 6;
+
+                // 计算按键背景的起始X坐标（居中对齐：法术槽中心点 - 总宽度的一半）
+                int keyBackgroundX = x + 11 - totalBackgroundWidth / 2;
+
+                // 绘制按键背景：左边框（3px） + 中间可伸缩部分 + 右边框（3px）
+                context.blit(KEY_TEXTURE, keyBackgroundX, y, 0, 32, 3, 12);                // 左边框
+                context.blit(KEY_TEXTURE, keyBackgroundX + 3, y, 16, 32, textWidth, 12);   // 中间部分
+                context.blit(KEY_TEXTURE, keyBackgroundX + 3 + textWidth, y, 13, 32, 3, 12); // 右边框
+
+                // 绘制文字（左边框后直接开始）
+                context.drawString(font, keyName, keyBackgroundX + 3, y + 2, 0xFFFFFF);
+            }
+        }
+
+    }
+
+    /**
+     * Maps key codes to texture coordinates for rendering key hints.
+     * Mouse buttons (0-6) return texture coordinates with isMouse=true.
+     * Keyboard keys return isMouse=false and will be rendered as text.
+     *
+     * @param keyCode GLFW key code
+     * @return BlitContext containing texture coordinates and rendering type
+     */
+    private BlitContext getContext(int keyCode) {
+        return switch (keyCode) {
+            // Mouse buttons (GLFW codes: 0-6) - 使用纹理渲染
+            case 0 -> new BlitContext(true, 0, 0, 9, 12);       // Left Click
+            case 1 -> new BlitContext(true, 16, 0, 9, 12);      // Right Click
+            case 2 -> new BlitContext(true, 32, 0, 9, 12);      // Middle Click
+            case 3 -> new BlitContext(true, 0, 16, 10, 12);     // Side Button 1 (Back)
+            case 4 -> new BlitContext(true, 16, 16, 10, 12);    // Side Button 2 (Forward)
+            case 5 -> new BlitContext(true, 32, 16, 9, 12);     // Extra Button 1
+            case 6 -> new BlitContext(true, 48, 16, 9, 12);     // Extra Button 2
+
+            // Keyboard keys - 使用文字渲染 (设置width>0以通过检查)
+            default -> new BlitContext(false, 0, 0, 22, 16);
+        };
     }
 
     public void down(){
