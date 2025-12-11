@@ -15,9 +15,12 @@ public class Nomoremagicchoices {
     public static final String MODID = "nomoremagicchoices";
     public static final Logger LOGGER = LogUtils.getLogger();
 
+
+
     public Nomoremagicchoices(IEventBus modEventBus, ModContainer modContainer) {
         // 注册客户端配置文件
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+        
     }
 
 }

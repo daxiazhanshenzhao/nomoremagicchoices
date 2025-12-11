@@ -15,6 +15,8 @@ import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.nomoremagicchoices.api.init.TagInit;
+import org.nomoremagicchoices.api.selection.ClientData;
+import org.nomoremagicchoices.api.selection.SpellGroupData;
 import org.nomoremagicchoices.gui.SpellSelectionLayerV1;
 import org.nomoremagicchoices.player.KeyState;
 import org.nomoremagicchoices.player.ModKeyMapping;
@@ -98,7 +100,8 @@ public class ClientInputHandle {
         for (KeyState key : keys){
             if (key.wasPressed() && hasWeapon){
                 // 使用 SpellGroupData 获取当前组索引，确保与 ClientScrollData 同步
-                int currentGroupIndex = org.nomoremagicchoices.api.selection.SpellGroupData.instance.getCurrentGroupIndex();
+                int currentGroupIndex = ClientData.getInstance().getSpellGroupData()
+                        .getCurrentGroupIndex();
                 int slotIndexInGroup = keys.indexOf(key);
                 int i = slotIndexInGroup + currentGroupIndex * 4;
 

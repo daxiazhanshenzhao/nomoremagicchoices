@@ -7,7 +7,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.api.handle.ClientInputHandle;
-import org.nomoremagicchoices.api.selection.ClientScrollData;
+
+import org.nomoremagicchoices.api.selection.ClientData;
+import org.nomoremagicchoices.api.selection.ScrollWightData;
 import org.nomoremagicchoices.player.ModKeyMapping;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +39,7 @@ public class SkillCombatMixin {
             }
 
             // 只有当技能键绑定到数字键时才拦截物品栏切换
-            boolean shouldIntercept = hasSkillWeaponTag && ModKeyMapping.isAnySkillKeyBoundToNumber() && !ClientScrollData.getSpellWightList().isEmpty();
+            boolean shouldIntercept = hasSkillWeaponTag && ModKeyMapping.isAnySkillKeyBoundToNumber() && !ClientData.getInstance().getClientHandData().getState().isFocus();
             return !shouldIntercept;
         }
 

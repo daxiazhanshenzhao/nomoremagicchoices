@@ -6,8 +6,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.NeoForge;
 import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.event.RenderBgEvent;
-import org.nomoremagicchoices.api.selection.ClientScrollData;
+
+import org.nomoremagicchoices.api.selection.ClientData;
+import org.nomoremagicchoices.api.selection.ClientHandData;
 import org.nomoremagicchoices.api.selection.ILayerState;
+import org.nomoremagicchoices.api.selection.ScrollWightData;
 import org.nomoremagicchoices.gui.component.ScrollSpellWight;
 
 import java.util.List;
@@ -44,6 +47,7 @@ public class SpellSelectionLayerV2 implements ILayerState {
     @Override
     public void render(GuiGraphics context, DeltaTracker partialTick) {
         // 更新屏幕尺寸
+        if (ClientData.getInstance().nullPoint()) return;
         var screenWidth = context.guiWidth();
         var screenHeight = context.guiHeight();
 
@@ -53,11 +57,10 @@ public class SpellSelectionLayerV2 implements ILayerState {
         renderBg(TEXTURE, context,x , y,0,0, 105, 36,105,36);
         updateScreenSize(context);
 
-        // 执行ClientScrollData的tick处理
-        ClientScrollData.tickHandle();
+
 
         // 获取Widget列表并渲染
-        List<ScrollSpellWight> wightList = ClientScrollData.getSpellWightList();
+        List<ScrollSpellWight> wightList = ClientData.getInstance().getScrollWightData().getScrollWights();
 
         if (wightList == null || wightList.isEmpty()) {
             return;
@@ -66,7 +69,7 @@ public class SpellSelectionLayerV2 implements ILayerState {
         // 渲染所有Widget - 从大到小倒序渲染，让小index的Widget显示在最上层
         for (int i = wightList.size() - 1; i >= 0; i--) {
             ScrollSpellWight wight = wightList.get(i);
-            if (wight != null && wight != ScrollSpellWight.EMPTY) {
+            if (wight != null) {
                 wight.render(context, partialTick);
             }
         }
@@ -83,8 +86,6 @@ public class SpellSelectionLayerV2 implements ILayerState {
 
     @Override
     public void renderBg(ResourceLocation texture, GuiGraphics context, int x, int y,int uOffset,int vOffset, int width, int height,int textureWidth,int textureHeight) {
-        if (ClientScrollData.getSpellWightList().isEmpty()) return;
-
 
         RenderBgEvent event = new RenderBgEvent(texture, context, x, y,uOffset, vOffset, width, height,textureWidth,textureHeight);
         NeoForge.EVENT_BUS.post(event);

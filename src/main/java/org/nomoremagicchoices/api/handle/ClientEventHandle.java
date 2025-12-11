@@ -1,19 +1,36 @@
 package org.nomoremagicchoices.api.handle;
 
+import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
+import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.event.ChangeSpellEvent;
-import org.nomoremagicchoices.api.selection.ClientScrollData;
+
+import org.nomoremagicchoices.api.selection.ClientData;
+import org.nomoremagicchoices.api.selection.ClientHandData;
+import org.nomoremagicchoices.api.selection.ScrollWightData;
+import org.nomoremagicchoices.api.selection.SpellGroupData;
 
 @EventBusSubscriber(Dist.CLIENT)
 public class ClientEventHandle {
 
     @SubscribeEvent
     public static void clientTickEvent(ClientTickEvent.Pre event) {
-        ClientScrollData.tickHandle();
+
         ChangeSpellEvent.SpellCountMonitor.tick();
+        ClientData.getInstance().tick();
+
+
+
+    }
+    @SubscribeEvent
+    public static void changeEvent(LivingEquipmentChangeEvent event) {
+        if (event.getEntity() instanceof LocalPlayer player) {
+            Nomoremagicchoices.LOGGER.info("已经发生了物品栏位转换");
+        }
     }
 
 //    public static void changeItem()

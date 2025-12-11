@@ -17,6 +17,6 @@ public enum SpellSelectionState {
     }
 
     public boolean isFocus(){
-        return (this == Weapon) || (this == Staff) || (this == Spellbook);
+        return (this == Weapon) || (this == Staff);
     }
 }

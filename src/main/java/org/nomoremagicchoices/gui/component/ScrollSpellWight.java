@@ -9,7 +9,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2i;
 import org.nomoremagicchoices.Nomoremagicchoices;
-import org.nomoremagicchoices.api.selection.ClientScrollData;
+
+import org.nomoremagicchoices.api.selection.ClientHandData;
 import org.nomoremagicchoices.api.selection.SpellSelectionState;
 import org.nomoremagicchoices.player.ModKeyMapping;
 
@@ -20,7 +21,6 @@ public class ScrollSpellWight implements IMoveWight{
     public static final int TOTAL_TICKS = 8;
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Nomoremagicchoices.MODID, "textures/gui/icons.png");
     public static final ResourceLocation KEY_TEXTURE = ResourceLocation.fromNamespaceAndPath(Nomoremagicchoices.MODID, "textures/gui/keys.png");
-    public static final ScrollSpellWight EMPTY = new ScrollSpellWight(new Vector2i(0,0), new Vector2i(0,0), List.of(SpellData.EMPTY), -1);
 
     // 法术槽间隔常量
     /** Down状态下的法术槽水平间隔（像素） */
@@ -39,8 +39,9 @@ public class ScrollSpellWight implements IMoveWight{
 
     private double offset = 0;
 
+    private ClientHandData handData;
 
-    private ScrollSpellWight(Vector2i center, Vector2i ender, List<SpellData> groupSpells, int groupIndex) {
+    private ScrollSpellWight(Vector2i center, Vector2i ender, List<SpellData> groupSpells, int groupIndex,ClientHandData clientHandData) {
         this.center = center;
         this.ender = ender;
         this.groupSpells = groupSpells;
@@ -48,10 +49,13 @@ public class ScrollSpellWight implements IMoveWight{
     }
 
 
-    public static ScrollSpellWight create(int centerX, int centerY, List<SpellData> groupSpells, int groupIndex){
-        return new ScrollSpellWight(new Vector2i(centerX,centerY), new Vector2i(centerX,centerY), groupSpells, groupIndex);
+    public static ScrollSpellWight create(int centerX, int centerY, List<SpellData> groupSpells, int groupIndex,ClientHandData clientHandData){
+        return new ScrollSpellWight(new Vector2i(centerX,centerY), new Vector2i(centerX,centerY), groupSpells, groupIndex, clientHandData);
     }
 
+    public static ScrollSpellWight create(Vector2i center, List<SpellData> groupSpells, int groupIndex,ClientHandData clientHandData){
+        return new ScrollSpellWight(new Vector2i(center), new Vector2i(center), groupSpells, groupIndex,clientHandData);
+    }
 
 
 
@@ -288,7 +292,7 @@ public class ScrollSpellWight implements IMoveWight{
 
         if (blitContext.width() > 0 && blitContext.height() > 0) {
             // 法杖固定显示鼠标右键（第一个法术槽）
-            if (slotIndex == 0 && ClientScrollData.getState().equals(SpellSelectionState.Staff)) {
+            if (slotIndex == 0 && handData.getState().equals(SpellSelectionState.Staff)) {
                 BlitContext rightClickContext = getContext(1);
                 int centerX = x + 11 - rightClickContext.width() / 2;
                 context.blit(KEY_TEXTURE, centerX, y,
@@ -391,5 +395,9 @@ public class ScrollSpellWight implements IMoveWight{
 
     public int getGroupIndex() {
         return groupIndex;
+    }
+
+    public Vector2i getCenter() {
+        return center;
     }
 }
