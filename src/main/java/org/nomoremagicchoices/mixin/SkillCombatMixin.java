@@ -39,7 +39,7 @@ public class SkillCombatMixin {
             }
 
             // 只有当技能键绑定到数字键时才拦截物品栏切换
-            boolean shouldIntercept = hasSkillWeaponTag && ModKeyMapping.isAnySkillKeyBoundToNumber() && !ClientData.getInstance().getClientHandData().getState().isFocus();
+            boolean shouldIntercept = hasSkillWeaponTag && ModKeyMapping.isAnySkillKeyBoundToNumber() && !ClientData.getClientHandData().getState().isFocus();
             return !shouldIntercept;
         }
 

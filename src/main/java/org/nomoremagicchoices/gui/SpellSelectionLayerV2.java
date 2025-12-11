@@ -25,17 +25,7 @@ public class SpellSelectionLayerV2 implements ILayerState {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             Nomoremagicchoices.MODID, "textures/gui/bg.png");
 
-    /** Widget在Y轴的垂直间隔（像素） */
-    public static final int WIDGET_VERTICAL_SPACING = 5;
 
-    /** Focus状态下Widget相对于基础位置的Y轴偏移（像素，负值表示向上） */
-    public static final int FOCUS_Y_OFFSET = -10;
-
-    /** Widget渲染基础位置相对于屏幕中心的X轴偏移（像素） */
-    public static final int BASE_X_OFFSET = -190;
-
-    /** Widget渲染基础位置距离屏幕底部的距离（像素，正值表示向上） */
-    public static final int BASE_Y_OFFSET_FROM_BOTTOM = 23;
 
     private int screenWidth;
     private int screenHeight;
@@ -47,7 +37,6 @@ public class SpellSelectionLayerV2 implements ILayerState {
     @Override
     public void render(GuiGraphics context, DeltaTracker partialTick) {
         // 更新屏幕尺寸
-        if (ClientData.getInstance().nullPoint()) return;
         var screenWidth = context.guiWidth();
         var screenHeight = context.guiHeight();
 
@@ -60,7 +49,7 @@ public class SpellSelectionLayerV2 implements ILayerState {
 
 
         // 获取Widget列表并渲染
-        List<ScrollSpellWight> wightList = ClientData.getInstance().getScrollWightData().getScrollWights();
+        List<ScrollSpellWight> wightList = ClientData.getScrollWightData().getScrollWights();
 
         if (wightList == null || wightList.isEmpty()) {
             return;
@@ -73,6 +62,12 @@ public class SpellSelectionLayerV2 implements ILayerState {
                 wight.render(context, partialTick);
             }
         }
+//        for (int i =0;i < wightList.size();i++){
+//            ScrollSpellWight wight = wightList.get(i);
+//            if (wight != null) {
+//                wight.render(context, partialTick);
+//            }
+//        }
     }
 
     /**
@@ -102,4 +97,3 @@ public class SpellSelectionLayerV2 implements ILayerState {
 
 
 }
-

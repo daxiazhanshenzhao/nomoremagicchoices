@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2i;
 import org.nomoremagicchoices.Nomoremagicchoices;
 
+import org.nomoremagicchoices.api.selection.ClientData;
 import org.nomoremagicchoices.api.selection.ClientHandData;
 import org.nomoremagicchoices.api.selection.SpellSelectionState;
 import org.nomoremagicchoices.player.ModKeyMapping;
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class ScrollSpellWight implements IMoveWight{
 
-    public static final int TOTAL_TICKS = 8;
+    public static final int TOTAL_TICKS = 2;
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Nomoremagicchoices.MODID, "textures/gui/icons.png");
     public static final ResourceLocation KEY_TEXTURE = ResourceLocation.fromNamespaceAndPath(Nomoremagicchoices.MODID, "textures/gui/keys.png");
 
@@ -27,6 +28,7 @@ public class ScrollSpellWight implements IMoveWight{
     public static final int SPELL_SPACING_DOWN = 20;
     /** Focus状态下的法术槽水平间隔（像素） */
     public static final int SPELL_SPACING_FOCUS = 22;
+    public static final ScrollSpellWight EMPTY = ScrollSpellWight.create(new Vector2i(0,0), List.of(SpellData.EMPTY),0, ClientData.getClientHandData());
 
     private State state = State.Down;
     private State targetState = State.Down; // 移动完成后的目标状态
@@ -46,6 +48,7 @@ public class ScrollSpellWight implements IMoveWight{
         this.ender = ender;
         this.groupSpells = groupSpells;
         this.groupIndex = groupIndex;
+        this.handData = clientHandData;
     }
 
 
@@ -167,9 +170,13 @@ public class ScrollSpellWight implements IMoveWight{
         }
     }
     public void render(GuiGraphics context, DeltaTracker partialTick){
-        if (groupSpells == null || groupSpells.isEmpty()) return;
+        if (groupSpells == null || groupSpells.isEmpty()) {
+            return;
+        }
 
-        context.pose().pushPose();
+
+
+//        context.pose().pushPose();
 
         // 根据状态选择法术间隔
         int spacing = (state == State.Focus) ? SPELL_SPACING_FOCUS : SPELL_SPACING_DOWN;
@@ -212,11 +219,13 @@ public class ScrollSpellWight implements IMoveWight{
             slotIndex++;
         }
 
-        context.pose().popPose();
+//        context.pose().popPose();
 
     }
 
     public void renderSlot(GuiGraphics context,SpellData spell,int x,int y){
+        // 调试信息
+
 
         //黑色背景
 //        if (state.equals(State.Down)){
@@ -399,5 +408,16 @@ public class ScrollSpellWight implements IMoveWight{
 
     public Vector2i getCenter() {
         return center;
+    }
+    public boolean isFocus() {
+        return state.equals(State.Focus);
+    }
+
+
+    public boolean compareEqualsSpell(ScrollSpellWight wight){
+        var oldSpell = this.getGroupSpells().getFirst().getSpell();
+        var newSpell = wight.getGroupSpells().getFirst().getSpell();
+
+        return oldSpell.equals(newSpell);
     }
 }

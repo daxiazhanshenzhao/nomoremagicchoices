@@ -16,6 +16,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.api.selection.ClientData;
+import org.nomoremagicchoices.api.selection.ScrollWightData;
 import org.nomoremagicchoices.api.selection.SpellGroupData;
 import org.nomoremagicchoices.gui.SpellSelectionLayerV1;
 import org.nomoremagicchoices.player.KeyState;
@@ -43,7 +44,7 @@ public class ClientInputHandle {
     @SubscribeEvent
     public static void onClientClick(InputEvent.Key event){
         handleSkill();
-        // handleGroup(); // 注释掉：避免消耗consumeClick事件，由ClientScrollData.handleRunning()处理
+         handleGroup();
 
     }
 
@@ -76,8 +77,16 @@ public class ClientInputHandle {
 
     // 已移至 ClientScrollData.handleRunning() 处理，避免重复消耗按键事件
     public static void handleGroup() {
+        if (ScrollWightData.isTicking()) return;
+
         if (ModKeyMapping.CHANG_GROUP.get().consumeClick()){
-            SpellSelectionLayerV1.nextGroup();
+            SpellGroupData.move(1);
+        }
+        if (ModKeyMapping.NEXT_GROUP.get().consumeClick()){
+            SpellGroupData.add();
+        }
+        if (ModKeyMapping.PREV_GROUP.get().consumeClick()){
+            SpellGroupData.less();
         }
     }
 
@@ -100,8 +109,7 @@ public class ClientInputHandle {
         for (KeyState key : keys){
             if (key.wasPressed() && hasWeapon){
                 // 使用 SpellGroupData 获取当前组索引，确保与 ClientScrollData 同步
-                int currentGroupIndex = ClientData.getInstance().getSpellGroupData()
-                        .getCurrentGroupIndex();
+                int currentGroupIndex = SpellGroupData.getCurrentGroupIndex();
                 int slotIndexInGroup = keys.indexOf(key);
                 int i = slotIndexInGroup + currentGroupIndex * 4;
 

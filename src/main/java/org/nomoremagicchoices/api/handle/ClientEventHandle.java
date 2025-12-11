@@ -21,7 +21,8 @@ public class ClientEventHandle {
     public static void clientTickEvent(ClientTickEvent.Pre event) {
 
         ChangeSpellEvent.SpellCountMonitor.tick();
-        ClientData.getInstance().tick();
+
+        ClientData.tick();
 
 
 

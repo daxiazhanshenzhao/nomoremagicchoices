@@ -4,51 +4,80 @@ import io.redspace.ironsspellbooks.api.magic.SpellSelectionManager;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.jetbrains.annotations.Nullable;
+import org.nomoremagicchoices.Nomoremagicchoices;
 
+
+@EventBusSubscriber
 public class ClientData {
 
 
-    private ClientHandData clientHandData;
-    private ScrollWightData scrollWightData;
-    private SpellGroupData spellGroupData;
 
-    private SpellSelectionManager manager;
-    private Minecraft mc;
-    private LocalPlayer player;
+    static ClientHandData clientHandData;
+    static ScrollWightData scrollWightData;
+    static SpellGroupData spellGroupData;
 
-    private ClientData(Minecraft mc,SpellSelectionManager manager){
+    static SpellSelectionManager manager;
+    static Minecraft mc = Minecraft.getInstance();
+    static LocalPlayer player;
 
-        this.mc = mc;
+
+    public static void init(Minecraft minecraft, SpellSelectionManager spellSelectionManager){
+        mc = minecraft;
         player = mc.player;
-        this.manager = manager;
+        manager = spellSelectionManager;
 
-        clientHandData = new ClientHandData(mc);
-        spellGroupData = new SpellGroupData(manager);
-        scrollWightData = new ScrollWightData(spellGroupData,clientHandData);
+        ClientHandData.init(mc);
+        SpellGroupData.init(manager);
     }
-    public SpellGroupData getSpellGroupData() {
+    public static SpellGroupData getSpellGroupData() {
         return spellGroupData;
     }
 
-    public ClientHandData getClientHandData() {
+    public static ClientHandData getClientHandData() {
         return clientHandData;
     }
 
-    public ScrollWightData getScrollWightData() {
+    public static ScrollWightData getScrollWightData() {
+        if (scrollWightData == null) {
+            scrollWightData = new ScrollWightData(spellGroupData,clientHandData);
+        }
+
         return scrollWightData;
     }
 
-    public void tick() {
-
-            spellGroupData.tick();
-            clientHandData.tick();
-            scrollWightData.tick();
-
+    public static void tick() {
+            SpellGroupData.tick();
+            ClientHandData.tick();
+            getScrollWightData().tick();
     }
 
-    //manager========================================
-    //group
+
+
+
+
+
+
+
+
+
+
+
+
+    @SubscribeEvent
+    public static void initManager(SpellSelectionManager.SpellSelectionEvent event){
+        if (event.getEntity() instanceof LocalPlayer) {
+
+            var manager = event.getManager();
+            var mc = Minecraft.getInstance();
+            ClientData.init(mc,manager);
+        }
+
+
+    }
 
 
 

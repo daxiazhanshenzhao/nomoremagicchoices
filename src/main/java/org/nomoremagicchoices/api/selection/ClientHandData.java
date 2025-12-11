@@ -5,18 +5,21 @@ import io.redspace.ironsspellbooks.player.ClientMagicData;
 import io.redspace.ironsspellbooks.registries.ComponentRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.common.NeoForge;
+import org.nomoremagicchoices.api.handle.ChangeHandEvent;
 import org.nomoremagicchoices.api.init.TagInit;
 
 public class ClientHandData {
 
-    private SpellSelectionState state;
-    private Minecraft mc;
+    private static SpellSelectionState state = SpellSelectionState.EmptyHand;
+    private static Minecraft mc;
 
-    public ClientHandData(Minecraft mc){
-        this.mc = mc;
+
+    public static void init(Minecraft minecraft){
+        mc = minecraft;
     }
 
-    public void tick(){
+    public static void tick(){
         if (mc == null) return;
 
         var player = mc.player;
@@ -37,11 +40,26 @@ public class ClientHandData {
         } else {
             newState = SpellSelectionState.EmptyHand;
         }
+        if (state.equals(newState)) return;
 
-        state = newState;
+        changeState(newState);
+
     }
 
-    public SpellSelectionState getState() {
+    public static SpellSelectionState getState() {
         return state;
+    }
+
+
+    public static void changeState(SpellSelectionState newState) {
+
+        ChangeHandEvent event = new ChangeHandEvent(state, newState);
+        NeoForge.EVENT_BUS.post(event);
+        if (event.isCanceled()) return;
+
+        state = event.getNewState();
+    }
+    public static boolean isFocus() {
+        return state.isFocus();
     }
 }
