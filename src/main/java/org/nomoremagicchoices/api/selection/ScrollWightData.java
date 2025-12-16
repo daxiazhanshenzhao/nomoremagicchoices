@@ -257,7 +257,7 @@ public class ScrollWightData {
             if (ClientMagicData.isCasting()) return;
 
             //从空手切换到focus
-            var endeY = calculateCenter(0).position().y() - FOCUS_HEIGHT;
+            var endeY = calculateCenter(0).position().y();
             var ender = new Vector2i(calculateCenter(0).position().x,endeY);
             scrollWights.getFirst()
                     .addTasks(Moving.start()
