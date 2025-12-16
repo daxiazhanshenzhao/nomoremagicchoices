@@ -87,21 +87,27 @@ public class ScrollWightData {
 
                         //对Focus做处理
                         if (ClientHandData.isFocus()){
-                            //组件从size-1到0
-                            if (scrollWights.getLast().compareEqualsSpell(newWight)){
+                            //组件从size-1到0（最后一个组件移动到第一个位置）
+                            if (oldScrollWights.getLast().compareEqualsSpell(oldWight) && newScrollWights.getFirst().compareEqualsSpell(newWight)){
                                 var endeY = calculateCenter(0).position().y() - FOCUS_HEIGHT;
                                 var ender = new Vector2i(calculateCenter(0).position().x,endeY);
 
                                 moving.addPos(ender);
                                 moving.endState(State.Focus);
                             }
-                            //从0到其他位置
-                            if(scrollWights.getFirst().compareEqualsSpell(oldWight)){
-
+                            //从0到其他位置（第一个组件移动到其他位置）
+                            else if(oldScrollWights.getFirst().compareEqualsSpell(oldWight) && !newScrollWights.getFirst().compareEqualsSpell(newWight)){
+                                // 先移动到目标位置（Down状态）
+                                moving.addPos(newContext.position());
+                                // 然后状态从Focus变为Down
+                                moving.endState(State.Down);
+                            }
+                            else {
+                                // 其他情况，正常移动但保持Focus状态
+                                moving.addPos(newContext.position()).endState(State.Focus);
                             }
                         }else{
                             moving.addPos(newContext.position()).endState(State.Down);
-
                         }
 
 
@@ -131,17 +137,12 @@ public class ScrollWightData {
 
     public void tick(){
         if (isTicking){
-//            cTick++;
-//            if (cTick == MOVE_TICKS){
-//                isTicking = false;
-//                cTick = 0;
-//                scrollWights = getNewScrollWights();
-//            }
-            for (AbstractWight wight : scrollWights) {
-                if (wight.isRunning()) return;
+            cTick++;
+            if (cTick == MOVE_TICKS){
+                isTicking = false;
+                cTick = 0;
+                scrollWights = getNewScrollWights();
             }
-            isTicking = false;
-            scrollWights = getNewScrollWights();
         }
         
         // 检查scrollWights是否为null
@@ -223,13 +224,13 @@ public class ScrollWightData {
 
         // 对于index 0，如果是Focus状态，需要额外上移
         State state = State.Down;
-//        if (wightIndex == 0) {
-//            // 检查ClientHandData是否为Focus状态
-//            if (handData != null && handData.isFocus()){
-//                 y = y - FOCUS_HEIGHT;
-//                 state = State.Focus;
-//            }
-//        }
+        if (wightIndex == 0) {
+            // 检查ClientHandData是否为Focus状态
+            if (ClientHandData.isFocus()){
+                 y = y - FOCUS_HEIGHT;
+                 state = State.Focus;
+            }
+        }
         
         return new WightContext(new Vector2i(x, y), state);
     }
@@ -264,13 +265,14 @@ public class ScrollWightData {
                             .endState(State.Focus));
         } else if (oldState.isFocus() && newState.unFocus()) {
             //从focus切换到空手
-
             if (ClientMagicData.isCasting()) return;
 
-
-
-            var endeY = calculateCenter(0).position().y();
-            var ender = new Vector2i(calculateCenter(0).position().x,endeY);
+            // 计算Down状态的位置（不上移FOCUS_HEIGHT）
+            // 临时将ClientHandData.isFocus()视为false来计算Down位置
+            // 我们需要计算原始Down位置，即当前Focus位置 + FOCUS_HEIGHT
+            var currentFocusY = calculateCenter(0).position().y();
+            var downY = currentFocusY - FOCUS_HEIGHT;
+            var ender = new Vector2i(calculateCenter(0).position().x, currentFocusY);
 
             scrollWights.getFirst()
                     .addTasks(Moving.start().addPos(ender).endState(State.Down));

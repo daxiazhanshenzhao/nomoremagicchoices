@@ -12,10 +12,16 @@ public record WightContext(Vector2i position, State state){
      */
     public boolean canRun(WightContext ender){
         if (ender != null){
+            // 如果位置不同，需要移动
             if (!this.position().equals(ender.position())){
                 return true;
             }
-        }return false;
+            // 如果位置相同但状态不同，也需要执行状态变化
+            if (!this.state().equals(ender.state())){
+                return true;
+            }
+        }
+        return false;
     }
 
 
