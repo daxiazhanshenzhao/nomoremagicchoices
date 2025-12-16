@@ -8,6 +8,8 @@ import io.redspace.ironsspellbooks.player.ClientMagicData;
 import io.redspace.ironsspellbooks.registries.ComponentRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -24,7 +26,8 @@ import org.nomoremagicchoices.player.ModKeyMapping;
 
 import java.util.List;
 
-@EventBusSubscriber
+@EventBusSubscriber(Dist.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ClientInputHandle {
 
     private static final KeyState SKILL_1 = getKeyState(ModKeyMapping.SKILL_1.get());

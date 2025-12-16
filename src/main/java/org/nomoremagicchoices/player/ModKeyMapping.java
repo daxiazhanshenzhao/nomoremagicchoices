@@ -2,6 +2,8 @@ package org.nomoremagicchoices.player;
 
 import io.redspace.ironsspellbooks.player.KeyState;
 import net.minecraft.client.KeyMapping;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.jarjar.nio.util.Lazy;
@@ -9,7 +11,8 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 
 import javax.swing.*;
 
-@EventBusSubscriber
+@EventBusSubscriber(Dist.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ModKeyMapping {
 
     public static final String SKILL_CATEGORY = "key.categories.nomoremagicchoices";

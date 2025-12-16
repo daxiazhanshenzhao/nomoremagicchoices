@@ -75,8 +75,16 @@ public class SpellSelectionLayerV2 implements ILayerState {
      * 更新屏幕尺寸
      */
     private void updateScreenSize(GuiGraphics guiGraphics) {
-        this.screenHeight = guiGraphics.guiHeight();
-        this.screenWidth = guiGraphics.guiWidth();
+        if (this.screenHeight != guiGraphics.guiHeight() || this.screenWidth != guiGraphics.guiWidth()) {
+
+            ClientData.getScrollWightData().update();
+
+            this.screenHeight = guiGraphics.guiHeight();
+            this.screenWidth = guiGraphics.guiWidth();
+        }
+
+
+
     }
 
 

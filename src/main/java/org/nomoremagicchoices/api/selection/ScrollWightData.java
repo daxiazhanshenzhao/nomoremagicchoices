@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import org.joml.Vector2i;
 import org.nomoremagicchoices.Nomoremagicchoices;
+import org.nomoremagicchoices.config.ClientConfig;
 import org.nomoremagicchoices.gui.component.AbstractWight;
 import org.nomoremagicchoices.gui.component.EmptyWight;
 import org.nomoremagicchoices.gui.component.Moving;
@@ -21,11 +22,12 @@ public class ScrollWightData {
     private static final int SCROLL_WIGHT_FOCUS_INDEX = 0;
     private static final int SCROLL_WIGHT_HEIGHT = 8;
 
-    private static final int FOCUS_HEIGHT = 30;
+    private static final int FOCUS_HEIGHT = ClientConfig.FOCUS_HEIGHT.get();            //10
 
 
-    private static final int centerXOffset = -200;
-    private static final int centerYOffset = -50;
+    private static final int centerXOffset = ClientConfig.CENTER_X_OFFSET.get();        //-195
+    private static final int centerYOffset = ClientConfig.CENTER_Y_OFFSET.get();        //-22
+
     /**
      *
      *    □□□□ 0
@@ -250,8 +252,6 @@ public class ScrollWightData {
      * 对玩家切换手作特殊处理
      */
     public void handleHand(SpellSelectionState oldState,SpellSelectionState newState){
-        Nomoremagicchoices.LOGGER.info(oldState.toString() + "旧状态");
-        Nomoremagicchoices.LOGGER.info(newState.toString()+ "新状态");
 
         if (oldState.unFocus() && newState.isFocus()){
             if (ClientMagicData.isCasting()) return;

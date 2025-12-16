@@ -8,7 +8,7 @@ import net.neoforged.neoforge.common.NeoForge;
  * Event fired when casting state changes.
  * Specifically fires when isCasting changes from true to false (casting ends).
  */
-
+@Deprecated
 public class ChangeCastingEvent extends Event {
 
     public ChangeCastingEvent() {

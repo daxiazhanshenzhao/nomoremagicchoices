@@ -53,7 +53,7 @@ public class SpellGroupData{
          var newSpells = manager.getAllSpells().stream().map(selectionOption -> selectionOption.spellData).toList();
          var newSelectIndex = manager.getSelectionIndex();
 
-         if (!newSpells.equals(spells) || newSelectIndex != selectIndex) {
+         if (newSelectIndex != selectIndex || !newSpells.equals(spells)) {
             update();
          }
     }
@@ -111,34 +111,28 @@ public class SpellGroupData{
 
 
     public static void move(int offset) {
-
         int newIndex = currentGroupIndex + offset;
 
         if (groupCount > 0) {
-
             while (newIndex < 0) {
                 newIndex += groupCount;
             }
-
             newIndex = newIndex % groupCount;
         } else {
-
             newIndex = 0;
         }
         
         currentGroupIndex = newIndex;
         var selectIndex = Math.min(currentGroupIndex * SPELLS_PER_GROUP, spells.size() - 1);
         manager.makeSelection(selectIndex);
+        
+        // 立即更新，确保状态同步
+        update();
     }
 
     public static int getGroupCount() {
         return groupCount;
     }
 
-    /**
-     * 检测按键按下
-     */
-    public static void handleChange(){
 
-    }
 }

@@ -22,6 +22,7 @@ import java.util.List;
  * 法术选择栏渲染层
  * 负责在屏幕上渲染法术栏、滚动条和选中的法术图标
  */
+@Deprecated
 public class SpellSelectionLayerV1 implements LayeredDraw.Layer {
 
     // ========== 纹理资源 ==========

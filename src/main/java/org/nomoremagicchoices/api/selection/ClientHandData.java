@@ -60,7 +60,6 @@ public class ClientHandData {
         var scrollWightData = ClientData.getScrollWightData();
         if (scrollWightData != null) {
             scrollWightData.handleHand(event.getOldState(),event.getNewState());
-            Nomoremagicchoices.LOGGER.info("触发空手变动");
         }
     }
     public static boolean isFocus() {

@@ -1,6 +1,7 @@
 package org.nomoremagicchoices.gui;
 
 import io.redspace.ironsspellbooks.gui.overlays.SpellBarOverlay;
+import io.redspace.ironsspellbooks.player.ClientMagicData;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.LayeredDraw;
@@ -26,7 +27,12 @@ public class SpellSelectionProvider implements LayeredDraw.Layer {
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
-        customLayer.render(guiGraphics, deltaTracker);
+        if (ClientConfig.ENABLE_CUSTOM_UI.get()){
+            // 法术数量少于阈值时使用自定义UI
+            if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get()){
+                customLayer.render(guiGraphics, deltaTracker);
+            }
+        }
     }
 
 
@@ -37,11 +43,14 @@ public class SpellSelectionProvider implements LayeredDraw.Layer {
 
     @SubscribeEvent
     public static void RenderGuiEvent(RenderGuiLayerEvent.Pre event) {
-        if (ClientConfig.ENABLE_CUSTOM_UI.get()) {
-            if (event.getLayer() instanceof SpellBarOverlay){
-                event.setCanceled(true);
+        if (event.getLayer() instanceof SpellBarOverlay){
+            if (ClientConfig.ENABLE_CUSTOM_UI.get()) {
+                // 法术数量少于阈值时取消原版UI（使用自定义UI）
+                if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get()){
+                    event.setCanceled(true);
+                }
+                // 否则（法术数量 >= 阈值）不取消，使用原版UI
             }
         }
     }
 }
-
