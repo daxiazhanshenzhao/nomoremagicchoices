@@ -11,6 +11,7 @@ import org.nomoremagicchoices.api.selection.ClientData;
 import org.nomoremagicchoices.api.selection.ClientHandData;
 import org.nomoremagicchoices.api.selection.ILayerState;
 import org.nomoremagicchoices.api.selection.ScrollWightData;
+import org.nomoremagicchoices.gui.component.AbstractWight;
 import org.nomoremagicchoices.gui.component.ScrollSpellWight;
 
 import java.util.List;
@@ -49,7 +50,7 @@ public class SpellSelectionLayerV2 implements ILayerState {
 
 
         // 获取Widget列表并渲染
-        List<ScrollSpellWight> wightList = ClientData.getScrollWightData().getScrollWights();
+        List<AbstractWight> wightList = ClientData.getScrollWightData().getScrollWights();
 
         if (wightList == null || wightList.isEmpty()) {
             return;
@@ -57,13 +58,13 @@ public class SpellSelectionLayerV2 implements ILayerState {
 
         // 渲染所有Widget - 从大到小倒序渲染，让小index的Widget显示在最上层
         for (int i = wightList.size() - 1; i >= 0; i--) {
-            ScrollSpellWight wight = wightList.get(i);
+            AbstractWight wight = wightList.get(i);
             if (wight != null) {
                 wight.render(context, partialTick);
             }
         }
 //        for (int i =0;i < wightList.size();i++){
-//            ScrollSpellWight wight = wightList.get(i);
+//            AbstractWight wight = wightList.get(i);
 //            if (wight != null) {
 //                wight.render(context, partialTick);
 //            }

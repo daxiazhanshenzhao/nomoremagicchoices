@@ -6,6 +6,7 @@ import io.redspace.ironsspellbooks.registries.ComponentRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
+import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.handle.ChangeHandEvent;
 import org.nomoremagicchoices.api.init.TagInit;
 
@@ -40,10 +41,9 @@ public class ClientHandData {
         } else {
             newState = SpellSelectionState.EmptyHand;
         }
-        if (state.equals(newState)) return;
-
-        changeState(newState);
-
+        if (!state.equals(newState)) {
+            changeState(newState);
+        }
     }
 
     public static SpellSelectionState getState() {
@@ -58,6 +58,13 @@ public class ClientHandData {
         if (event.isCanceled()) return;
 
         state = event.getNewState();
+        
+        // 当手部状态变化时，更新ScrollWightData，让法术组收回到最上方
+        var scrollWightData = ClientData.getScrollWightData();
+        if (scrollWightData != null) {
+            scrollWightData.update();
+            Nomoremagicchoices.LOGGER.info("update");
+        }
     }
     public static boolean isFocus() {
         return state.isFocus();

@@ -55,18 +55,6 @@ public class ClientData {
             getScrollWightData().tick();
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
     @SubscribeEvent
     public static void initManager(SpellSelectionManager.SpellSelectionEvent event){
         if (event.getEntity() instanceof LocalPlayer) {

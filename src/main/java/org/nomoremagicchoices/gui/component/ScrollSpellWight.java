@@ -17,6 +17,8 @@ import org.nomoremagicchoices.player.ModKeyMapping;
 
 import java.util.List;
 
+
+@Deprecated
 public class ScrollSpellWight implements IMoveWight{
 
     public static final int TOTAL_TICKS = 2;
@@ -31,7 +33,7 @@ public class ScrollSpellWight implements IMoveWight{
     public static final ScrollSpellWight EMPTY = ScrollSpellWight.create(new Vector2i(0,0), List.of(SpellData.EMPTY),0, ClientData.getClientHandData());
 
     private State state = State.Down;
-    private State targetState = State.Down; // 移动完成后的目标状态
+    private State enderState = State.Down; // 移动完成后的目标状态
 
     private Vector2i center;
     private Vector2i ender;
@@ -71,85 +73,29 @@ public class ScrollSpellWight implements IMoveWight{
         // 设置目标位置（创建新对象避免引用问题）
         this.ender = new Vector2i(ender);
 
-        // 重置offset并开始移动
+
         setOffset(0);
         state = State.Moving;
-
-        // 默认根据坐标关系决定目标状态
-        if (ender.y < center.y) {
-            targetState = State.Focus;
-        } else {
-            targetState = State.Down;
-        }
 
     }
 
     /**
-     * 在底层移动（保持在底层状态）
-     * 用于底层法术槽之间的移动，移动完成后保持Down状态
-     * 空手模式下使用此方法
+     * 万能移动方法
+     * @param ender
+     * @param enderState
      */
-    public void moveDown(Vector2i ender) {
-        // 如果正在移动，检查目标是否改变
-        if (state.equals(State.Moving)) {
-            // 如果目标位置和目标状态都没变，不需要重新移动
-            if (this.ender.equals(ender) && this.targetState == State.Down) {
-                return;
-            }
-            // 目标改变了，需要重新开始移动
-            // 1. 计算当前实际位置（基于当前offset）
-            double realOffset = getRealOffset(offset);
-            int currentX = getXPosition(realOffset);
-            int currentY = getYPosition(realOffset);
+    public void move(Vector2i ender,State enderState){
+        if (state.equals(State.Moving) || this.ender.equals(ender)) return;
 
-            // 2. 将当前实际位置设为新的起点
-            this.center.set(currentX, currentY);
+        this.ender = ender;
+        this.enderState = enderState;
 
-            // 3. 设置新的目标位置和状态
-            this.ender = new Vector2i(ender);
-            this.targetState = State.Down;
 
-            // 4. 重置offset，从当前位置重新开始移动
-            setOffset(0);
-            return;
-        }
 
-        this.ender = new Vector2i(ender);
-        setOffset(0);
-        state = State.Moving;
-        targetState = State.Down; // 明确设置目标状态为Down
 
     }
 
-    /**
-     * 移动到焦点位置
-     * 移动完成后状态变为Focus
-     * 持有物品模式下，将选中的法术组移到顶部时使用此方法
-     */
-    public void moveFocus(Vector2i ender) {
-        // 如果正在移动，检查目标是否改变
-        if (state.equals(State.Moving)) {
-            // 如果目标位置和目标状态都没变，不需要重新移动
-            if (this.ender.equals(ender) && this.targetState == State.Focus) {
-                return;
-            }
-            // 目标改变了，需要重新开始移动
-            double realOffset = getRealOffset(offset);
-            int currentX = getXPosition(realOffset);
-            int currentY = getYPosition(realOffset);
 
-            this.center.set(currentX, currentY);
-            this.ender = new Vector2i(ender);
-            this.targetState = State.Focus;
-            setOffset(0);
-            return;
-        }
-
-        this.ender = new Vector2i(ender);
-        setOffset(0);
-        state = State.Moving;
-        targetState = State.Focus;
-    }
 
 
 
@@ -161,8 +107,7 @@ public class ScrollSpellWight implements IMoveWight{
 
             // 移动完成后更新状态和位置
             if (offset >= 1.0){
-                setOffset(1.0);
-                state = targetState;
+                state = enderState;
                 this.center.set(ender);
                 setOffset(0);
 
@@ -173,8 +118,6 @@ public class ScrollSpellWight implements IMoveWight{
         if (groupSpells == null || groupSpells.isEmpty()) {
             return;
         }
-
-
 
 //        context.pose().pushPose();
 
@@ -384,19 +327,7 @@ public class ScrollSpellWight implements IMoveWight{
      * <li>{@link State#Focus} - 法术图标位于顶部焦点位置，渲染尺寸：22×22像素
      * </ul>
      */
-    public enum State{
-        Down(0),
-        Moving(1),
-        Focus(2);
 
-        State(final int value) {
-            this.value = value;
-        }
-        private final int value;
-        public int getValue() {
-            return value;
-        }
-    }
 
     public List<SpellData> getGroupSpells() {
         return groupSpells;
@@ -419,5 +350,89 @@ public class ScrollSpellWight implements IMoveWight{
         var newSpell = wight.getGroupSpells().getFirst().getSpell();
 
         return oldSpell.equals(newSpell);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Deprecated
+    /**
+     * 在底层移动（保持在底层状态）
+     * 用于底层法术槽之间的移动，移动完成后保持Down状态
+     * 空手模式下使用此方法
+     */
+    public void moveDown(Vector2i ender) {
+        // 如果正在移动，检查目标是否改变
+        if (state.equals(State.Moving)) {
+            // 如果目标位置和目标状态都没变，不需要重新移动
+            if (this.ender.equals(ender) && this.enderState == State.Down) {
+                return;
+            }
+            // 目标改变了，需要重新开始移动
+            // 1. 计算当前实际位置（基于当前offset）
+            double realOffset = getRealOffset(offset);
+            int currentX = getXPosition(realOffset);
+            int currentY = getYPosition(realOffset);
+
+            // 2. 将当前实际位置设为新的起点
+            this.center.set(currentX, currentY);
+
+            // 3. 设置新的目标位置和状态
+            this.ender = new Vector2i(ender);
+            this.enderState = State.Down;
+
+            // 4. 重置offset，从当前位置重新开始移动
+            setOffset(0);
+            return;
+        }
+
+        this.ender = new Vector2i(ender);
+        setOffset(0);
+        state = State.Moving;
+        enderState = State.Down; // 明确设置目标状态为Down
+
+    }
+
+    @Deprecated
+    /**
+     * 移动到焦点位置
+     * 移动完成后状态变为Focus
+     * 持有物品模式下，将选中的法术组移到顶部时使用此方法
+     */
+    public void moveFocus(Vector2i ender) {
+        // 如果正在移动，检查目标是否改变
+        if (state.equals(State.Moving)) {
+            // 如果目标位置和目标状态都没变，不需要重新移动
+            if (this.ender.equals(ender) && this.enderState == State.Focus) {
+                return;
+            }
+            // 目标改变了，需要重新开始移动
+            double realOffset = getRealOffset(offset);
+            int currentX = getXPosition(realOffset);
+            int currentY = getYPosition(realOffset);
+
+            this.center.set(currentX, currentY);
+            this.ender = new Vector2i(ender);
+            this.enderState = State.Focus;
+            setOffset(0);
+            return;
+        }
+
+        this.ender = new Vector2i(ender);
+        setOffset(0);
+        state = State.Moving;
+        enderState = State.Focus;
     }
 }

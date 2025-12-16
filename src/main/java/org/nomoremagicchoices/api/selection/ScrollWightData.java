@@ -3,7 +3,13 @@ package org.nomoremagicchoices.api.selection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import org.joml.Vector2i;
+import org.nomoremagicchoices.gui.component.AbstractWight;
+import org.nomoremagicchoices.gui.component.EmptyWight;
+import org.nomoremagicchoices.gui.component.Moving;
 import org.nomoremagicchoices.gui.component.ScrollSpellWight;
+import org.nomoremagicchoices.gui.component.ScrollSpellWightV2;
+import org.nomoremagicchoices.gui.component.WightContext;
+import org.nomoremagicchoices.gui.component.State;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,25 +37,25 @@ public class ScrollWightData {
      *
      *
      */
-    private List<ScrollSpellWight> scrollWights;
+    private List<AbstractWight> scrollWights;
     private Vector2i center;
 
     public ScrollWightData(SpellGroupData spellGroupData,ClientHandData clientHandData) {
-        groupData = spellGroupData;
-        handData = clientHandData;
+        this.groupData = spellGroupData;
+        this.handData = clientHandData;
 
         update();
     }
 
-    private static SpellGroupData groupData;
-    private static ClientHandData handData;
+    private SpellGroupData groupData;
+    private ClientHandData handData;
 
     /**
      * {@link SpellGroupData#update()} 这个方法触发时会触发update
      */
     public void update(){
-        List<ScrollSpellWight> oldScrollWights = scrollWights;
-        List<ScrollSpellWight> newScrollWights = getNewScrollWights();
+        List<AbstractWight> oldScrollWights = scrollWights;
+        List<AbstractWight> newScrollWights = getNewScrollWights();
         
         // 如果是第一次初始化，直接设置scrollWights
         if (oldScrollWights == null) {
@@ -59,33 +65,40 @@ public class ScrollWightData {
         
         if (newScrollWights == null) return;
 
-        //比较坐标差距，然后移动
-        for(ScrollSpellWight oldScrollWight : oldScrollWights){
-            //比较不变的法术，法术包含冷却
-            if (oldScrollWight.compareEqualsSpell(ScrollSpellWight.EMPTY)) continue;
-            for (ScrollSpellWight newScrollWight : newScrollWights){
-                if (newScrollWight.compareEqualsSpell(ScrollSpellWight.EMPTY)) continue;
-
-                var newCenter = newScrollWight.getCenter();
-                var oldCenter = oldScrollWight.getCenter();
-                if ((newScrollWight.getGroupIndex() == oldScrollWight.getGroupIndex()) &&
-                        (Vector2i.distance(oldCenter.x(), oldCenter.y(), newCenter.x(), newCenter.y()) != 0)){
-                    oldScrollWight.moveDown(newCenter);
+        // 为每个旧组件设置移动任务
+        for(int i = 0; i < oldScrollWights.size(); i++){
+            AbstractWight oldWight = oldScrollWights.get(i);
+            if (oldWight.compareEqualsSpell(EmptyWight.EMPTY)) continue;
+            
+            // 找到对应的新组件（通过比较法术）
+            for(int j = 0; j < newScrollWights.size(); j++){
+                AbstractWight newWight = newScrollWights.get(j);
+                if (newWight.compareEqualsSpell(EmptyWight.EMPTY)) continue;
+                
+                if (oldWight.compareEqualsSpell(newWight)) {
+                    // 检查位置是否相同
+                    WightContext oldContext = oldWight.getCenter();
+                    WightContext newContext = newWight.getCenter();
+                    
+                    if (!oldContext.position().equals(newContext.position())) {
+                        // 创建移动任务
+                        Moving moving = Moving.start()
+                            .addPos(newContext.position())
+                            .endState(newContext.state());
+                        oldWight.addTasks(moving);
+                    }
+                    break;
                 }
-
             }
         }
-
-
-
 
         //等待移动完成过后，替换原组件
         wightTickHook();
 
     }//=========================================================
-    private static final int MOVE_TICKS = ScrollSpellWight.TOTAL_TICKS;
-    private static int cTick = 0;
-    private static boolean isTicking = false;
+    private final int MOVE_TICKS = 8;
+    private int cTick = 0;
+    private boolean isTicking = false;
 
     /**
      * 通过独立内部计时器进行延迟替换
@@ -109,14 +122,14 @@ public class ScrollWightData {
             return;
         }
         
-        for(ScrollSpellWight wight : scrollWights){
-            if (wight != null && !wight.equals(ScrollSpellWight.EMPTY)){
+        for(AbstractWight wight : scrollWights){
+            if (wight != null && !wight.equals(EmptyWight.EMPTY)){
                 wight.tick();
             }
         }
     }
 
-    public List<ScrollSpellWight> getNewScrollWights(){
+    public List<AbstractWight> getNewScrollWights(){
         var window = Minecraft.getInstance().getWindow();
         center = new Vector2i(window.getGuiScaledWidth()/2 + centerXOffset, window.getGuiScaledHeight() + centerYOffset);
 
@@ -126,29 +139,24 @@ public class ScrollWightData {
 
         // 如果组数为0，返回一个空列表
         if (groupCount == 0) {
-            return NonNullList.withSize(1, ScrollSpellWight.EMPTY);
+            return NonNullList.withSize(1, EmptyWight.EMPTY);
         }
 
         // 创建正确大小的列表
-        List<ScrollSpellWight> scrollWights = NonNullList.withSize(groupCount, ScrollSpellWight.EMPTY);
+        List<AbstractWight> scrollWights = NonNullList.withSize(groupCount, EmptyWight.EMPTY);
 
         // 填充当前组（放在索引0位置）
-        scrollWights.set(0, ScrollSpellWight.create(
-            calculateCenter(0),
-            SpellGroupData.getIndexSpells(cIndex),
-            cIndex,
-            handData
-        ));
+        scrollWights.set(0,new ScrollSpellWightV2(calculateCenter(0),SpellGroupData.getIndexSpells(cIndex),8));
 
         // 填充当前组之后的组
         int scrollIndex = 1;
         for (int afterGroupIndex = cIndex + 1; afterGroupIndex < groupCount; afterGroupIndex++) {
             if (scrollIndex >= groupCount) break;
-            scrollWights.set(scrollIndex, ScrollSpellWight.create(
-                calculateCenter(scrollIndex),
+            WightContext wightContext = calculateCenter(scrollIndex);
+            scrollWights.set(scrollIndex, new ScrollSpellWightV2(
+                wightContext,
                 SpellGroupData.getIndexSpells(afterGroupIndex),
-                afterGroupIndex,
-                handData
+                8
             ));
             scrollIndex++;
         }
@@ -156,11 +164,11 @@ public class ScrollWightData {
         // 填充当前组之前的组
         for (int beforeGroupIndex = 0; beforeGroupIndex < cIndex; beforeGroupIndex++) {
             if (scrollIndex >= groupCount) break;
-            scrollWights.set(scrollIndex, ScrollSpellWight.create(
-                calculateCenter(scrollIndex),
+            WightContext wightContext = calculateCenter(scrollIndex);
+            scrollWights.set(scrollIndex, new ScrollSpellWightV2(
+                wightContext,
                 SpellGroupData.getIndexSpells(beforeGroupIndex),
-                beforeGroupIndex,
-                handData
+                8
             ));
             scrollIndex++;
         }
@@ -171,13 +179,13 @@ public class ScrollWightData {
     }
 
 
-    public Vector2i calculateCenter(int wightIndex){
+    public WightContext calculateCenter(int wightIndex){
         int x = center.x();
         int y;
 
         int groupCount = SpellGroupData.getGroupCount();
         if (groupCount == 0) {
-            return new Vector2i(x, center.y());
+            return new WightContext(new Vector2i(x, center.y()), State.Down);
         }
 
         // 修改：当前组（wightIndex=0）在最上面（Y值最小）
@@ -187,21 +195,24 @@ public class ScrollWightData {
         y = center.y() - (groupCount - 1 - wightIndex) * SCROLL_WIGHT_HEIGHT;
 
         // 对于index 0，如果是Focus状态，需要额外上移
+        State state = State.Down;
         if (wightIndex == 0) {
-            //TODO 后面完善Focus的变化
-            if (false){
+            // 检查ClientHandData是否为Focus状态
+            if (handData != null && handData.isFocus()){
                  y = y - FOCUS_HEIGHT;
+                 state = State.Focus;
             }
         }
         
-        return new Vector2i(x, y);
+        return new WightContext(new Vector2i(x, y), state);
     }
 
-    public List<ScrollSpellWight> getScrollWights() {
+    public List<AbstractWight> getScrollWights() {
         return scrollWights;
     }
 
-    public static boolean isTicking() {
+    public boolean isTicking() {
         return isTicking;
     }
+
 }

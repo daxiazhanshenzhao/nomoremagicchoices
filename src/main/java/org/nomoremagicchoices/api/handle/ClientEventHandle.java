@@ -6,6 +6,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.event.ChangeSpellEvent;
 
@@ -18,11 +19,15 @@ import org.nomoremagicchoices.api.selection.SpellGroupData;
 public class ClientEventHandle {
 
     @SubscribeEvent
-    public static void clientTickEvent(ClientTickEvent.Pre event) {
+    public static void clientTickEvent(PlayerTickEvent.Pre event) {
 
-        ChangeSpellEvent.SpellCountMonitor.tick();
+        if (event.getEntity() instanceof LocalPlayer) {
+            ChangeSpellEvent.SpellCountMonitor.tick();
+            ClientData.tick();
 
-        ClientData.tick();
+        }
+
+
 
 
 

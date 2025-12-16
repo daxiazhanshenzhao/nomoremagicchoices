@@ -77,7 +77,8 @@ public class ClientInputHandle {
 
     // 已移至 ClientScrollData.handleRunning() 处理，避免重复消耗按键事件
     public static void handleGroup() {
-        if (ScrollWightData.isTicking()) return;
+        var scrollWightData = ClientData.getScrollWightData();
+        if (scrollWightData != null && scrollWightData.isTicking()) return;
 
         if (ModKeyMapping.CHANG_GROUP.get().consumeClick()){
             SpellGroupData.move(1);
