@@ -10,6 +10,8 @@ import java.util.List;
 
 public abstract class AbstractWight {
 
+    private boolean running;
+
     //TODO:以后看能不能用四元数的矩阵变换进行移动
     public void tick(){
         if (tasks == null || tasks.isEmpty()) {
@@ -37,6 +39,7 @@ public abstract class AbstractWight {
         if (center.state() != State.Moving) {
             // 创建新的WightContext，保持位置不变，状态改为Moving
             this.center = new WightContext(center.position(), State.Moving);
+            this.running = true;
         }
 
         // 执行移动动画
@@ -57,6 +60,7 @@ public abstract class AbstractWight {
                 this.center = ender;
                 tasks.clear();
                 cTaskIndex = 0;
+                this.running = false;
             }
         }
     }
@@ -119,4 +123,10 @@ public abstract class AbstractWight {
     public WightContext getCenter() {
         return center;
     }
+
+    public boolean isRunning(){
+        return this.running;
+    }
+
+
 }

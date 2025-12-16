@@ -1,17 +1,17 @@
 package org.nomoremagicchoices.api.selection;
 
+import io.redspace.ironsspellbooks.player.ClientMagicData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import org.joml.Vector2i;
+import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.gui.component.AbstractWight;
 import org.nomoremagicchoices.gui.component.EmptyWight;
 import org.nomoremagicchoices.gui.component.Moving;
-import org.nomoremagicchoices.gui.component.ScrollSpellWight;
 import org.nomoremagicchoices.gui.component.ScrollSpellWightV2;
 import org.nomoremagicchoices.gui.component.WightContext;
 import org.nomoremagicchoices.gui.component.State;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ScrollWightData {
@@ -81,10 +81,32 @@ public class ScrollWightData {
                     WightContext newContext = newWight.getCenter();
                     
                     if (!oldContext.position().equals(newContext.position())) {
+                        Moving moving = Moving.start();
                         // 创建移动任务
-                        Moving moving = Moving.start()
-                            .addPos(newContext.position())
-                            .endState(newContext.state());
+                        moving.addPos(newContext.position());
+
+                        //对Focus做处理
+                        if (ClientHandData.isFocus()){
+                            //组件从size-1到0
+                            if (scrollWights.getLast().compareEqualsSpell(newWight)){
+                                var endeY = calculateCenter(0).position().y() - FOCUS_HEIGHT;
+                                var ender = new Vector2i(calculateCenter(0).position().x,endeY);
+
+                                moving.addPos(ender);
+                                moving.endState(State.Focus);
+                            }
+                            //从0到其他位置
+                            if(scrollWights.getFirst().compareEqualsSpell(oldWight)){
+
+                            }
+                        }else{
+                            moving.addPos(newContext.position()).endState(State.Down);
+
+                        }
+
+
+
+
                         oldWight.addTasks(moving);
                     }
                     break;
@@ -96,25 +118,30 @@ public class ScrollWightData {
         wightTickHook();
 
     }//=========================================================
-    private final int MOVE_TICKS = 8;
+    private final int MOVE_TICKS = 3;
     private int cTick = 0;
     private boolean isTicking = false;
 
     /**
      * 通过独立内部计时器进行延迟替换
      */
-    private  void wightTickHook() {
+    private void wightTickHook() {
         isTicking = true;
     }
 
     public void tick(){
         if (isTicking){
-            cTick++;
-            if (cTick == MOVE_TICKS){
-                isTicking = false;
-                cTick = 0;
-                scrollWights = getNewScrollWights();
+//            cTick++;
+//            if (cTick == MOVE_TICKS){
+//                isTicking = false;
+//                cTick = 0;
+//                scrollWights = getNewScrollWights();
+//            }
+            for (AbstractWight wight : scrollWights) {
+                if (wight.isRunning()) return;
             }
+            isTicking = false;
+            scrollWights = getNewScrollWights();
         }
         
         // 检查scrollWights是否为null
@@ -146,7 +173,7 @@ public class ScrollWightData {
         List<AbstractWight> scrollWights = NonNullList.withSize(groupCount, EmptyWight.EMPTY);
 
         // 填充当前组（放在索引0位置）
-        scrollWights.set(0,new ScrollSpellWightV2(calculateCenter(0),SpellGroupData.getIndexSpells(cIndex),8));
+        scrollWights.set(0,new ScrollSpellWightV2(calculateCenter(0),SpellGroupData.getIndexSpells(cIndex),3));
 
         // 填充当前组之后的组
         int scrollIndex = 1;
@@ -156,7 +183,7 @@ public class ScrollWightData {
             scrollWights.set(scrollIndex, new ScrollSpellWightV2(
                 wightContext,
                 SpellGroupData.getIndexSpells(afterGroupIndex),
-                8
+                3
             ));
             scrollIndex++;
         }
@@ -168,7 +195,7 @@ public class ScrollWightData {
             scrollWights.set(scrollIndex, new ScrollSpellWightV2(
                 wightContext,
                 SpellGroupData.getIndexSpells(beforeGroupIndex),
-                8
+                    3
             ));
             scrollIndex++;
         }
@@ -196,13 +223,13 @@ public class ScrollWightData {
 
         // 对于index 0，如果是Focus状态，需要额外上移
         State state = State.Down;
-        if (wightIndex == 0) {
-            // 检查ClientHandData是否为Focus状态
-            if (handData != null && handData.isFocus()){
-                 y = y - FOCUS_HEIGHT;
-                 state = State.Focus;
-            }
-        }
+//        if (wightIndex == 0) {
+//            // 检查ClientHandData是否为Focus状态
+//            if (handData != null && handData.isFocus()){
+//                 y = y - FOCUS_HEIGHT;
+//                 state = State.Focus;
+//            }
+//        }
         
         return new WightContext(new Vector2i(x, y), state);
     }
@@ -215,4 +242,62 @@ public class ScrollWightData {
         return isTicking;
     }
 
+
+
+
+    /**
+     * 对玩家切换手作特殊处理
+     */
+    public void handleHand(SpellSelectionState oldState,SpellSelectionState newState){
+        Nomoremagicchoices.LOGGER.info(oldState.toString() + "旧状态");
+        Nomoremagicchoices.LOGGER.info(newState.toString()+ "新状态");
+
+        if (oldState.unFocus() && newState.isFocus()){
+            if (ClientMagicData.isCasting()) return;
+
+            //从空手切换到focus
+            var endeY = calculateCenter(0).position().y() - FOCUS_HEIGHT;
+            var ender = new Vector2i(calculateCenter(0).position().x,endeY);
+            scrollWights.getFirst()
+                    .addTasks(Moving.start()
+                            .addPos(ender)
+                            .endState(State.Focus));
+        } else if (oldState.isFocus() && newState.unFocus()) {
+            //从focus切换到空手
+
+            if (ClientMagicData.isCasting()) return;
+
+
+
+            var endeY = calculateCenter(0).position().y();
+            var ender = new Vector2i(calculateCenter(0).position().x,endeY);
+
+            scrollWights.getFirst()
+                    .addTasks(Moving.start().addPos(ender).endState(State.Down));
+        }
+
+
+
+        {
+
+        }
+        //当玩家从法杖，costing状态强制切换到空手时。
+
+
+    }
+
+    /**
+     * 切换组时，做特殊判定
+     */
+    public void handleGroup() {
+        //focus切换组
+        if (ClientHandData.isFocus()){
+            var endeY = calculateCenter(0).position().y() - FOCUS_HEIGHT;
+            var ender = new Vector2i(calculateCenter(0).position().x,endeY);
+            scrollWights.getFirst()
+                    .addTasks(Moving.start()
+                            .addPos(ender)
+                            .endState(State.Focus));
+        }
+    }
 }

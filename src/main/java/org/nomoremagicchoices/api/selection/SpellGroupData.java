@@ -5,6 +5,7 @@ import io.redspace.ironsspellbooks.api.spells.SpellData;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
 import net.minecraft.core.NonNullList;
 import net.neoforged.fml.common.EventBusSubscriber;
+import org.nomoremagicchoices.Nomoremagicchoices;
 
 import java.util.List;
 
@@ -37,8 +38,12 @@ public class SpellGroupData{
         currentGroupIndex = selectIndex / SPELLS_PER_GROUP;
         // 计算组数：向上取整的除法
         groupCount = (spells.size() + SPELLS_PER_GROUP - 1) / SPELLS_PER_GROUP;
+        var scrollData = ClientData.getScrollWightData();
 
-        ClientData.getScrollWightData().update();
+        scrollData.update();
+        Nomoremagicchoices.LOGGER.info("你他们怎么法杖这么多事情");
+
+
     }
 
 

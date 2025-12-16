@@ -1,10 +1,7 @@
 package org.nomoremagicchoices.api.selection;
 
-import io.redspace.ironsspellbooks.api.magic.SpellSelectionManager;
-import io.redspace.ironsspellbooks.player.ClientMagicData;
 import io.redspace.ironsspellbooks.registries.ComponentRegistry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
 import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.handle.ChangeHandEvent;
@@ -62,8 +59,8 @@ public class ClientHandData {
         // 当手部状态变化时，更新ScrollWightData，让法术组收回到最上方
         var scrollWightData = ClientData.getScrollWightData();
         if (scrollWightData != null) {
-            scrollWightData.update();
-            Nomoremagicchoices.LOGGER.info("update");
+            scrollWightData.handleHand(event.getOldState(),event.getNewState());
+            Nomoremagicchoices.LOGGER.info("触发空手变动");
         }
     }
     public static boolean isFocus() {
