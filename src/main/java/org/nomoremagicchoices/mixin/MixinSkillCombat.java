@@ -2,12 +2,15 @@ package org.nomoremagicchoices.mixin;
 
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import io.redspace.ironsspellbooks.player.ClientMagicData;
 import io.redspace.ironsspellbooks.registries.ComponentRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.api.handle.ClientInputHandle;
 
+import org.nomoremagicchoices.config.ClientConfig;
+import org.nomoremagicchoices.gui.SpellSelectionProvider;
 import org.nomoremagicchoices.player.ModKeyMapping;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,8 +41,13 @@ public class MixinSkillCombat {
             ClientInputHandle.setHasWeapon(hasWeapon);
 
             // 只有当技能键绑定到数字键时才拦截物品栏切换
-            boolean shouldIntercept = hasWeapon && ModKeyMapping.isAnySkillKeyBoundToNumber();
-            
+            boolean shouldIntercept = false;
+
+
+            if ( hasWeapon && ModKeyMapping.isAnySkillKeyBoundToNumber() && SpellSelectionProvider.customGui()){
+                shouldIntercept = true;
+            }
+
 //             调试信息（可以注释掉）
 //             if (hasWeapon) {
 //                 System.out.println("SkillCombatMixin: 持有武器/法杖，技能键绑定到数字键: " + ModKeyMapping.isAnySkillKeyBoundToNumber());

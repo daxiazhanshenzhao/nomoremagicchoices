@@ -21,17 +21,8 @@ public class ClientEventHandle {
 
         }
 
-
-
-
-
     }
-    @SubscribeEvent
-    public static void changeEvent(LivingEquipmentChangeEvent event) {
-        if (event.getEntity() instanceof LocalPlayer player) {
-            Nomoremagicchoices.LOGGER.info("已经发生了物品栏位转换");
-        }
-    }
+
 
 //    public static void changeItem()
 

@@ -19,6 +19,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.api.selection.ClientData;
 import org.nomoremagicchoices.api.selection.SpellGroupData;
+import org.nomoremagicchoices.config.ClientConfig;
+import org.nomoremagicchoices.gui.SpellSelectionProvider;
 import org.nomoremagicchoices.player.KeyState;
 import org.nomoremagicchoices.player.ModKeyMapping;
 
@@ -83,7 +85,8 @@ public class ClientInputHandle {
     public static void handleGroup() {
         // 移除isTicking检查，允许在动画期间切换组
         // 这样可以确保玩家随时可以通过法术轮盘切换法术
-        
+        if (!SpellSelectionProvider.customGui()) return;
+
         while (ModKeyMapping.NEXT_GROUP.get().consumeClick()){
             SpellGroupData.add();
         }
@@ -111,7 +114,7 @@ public class ClientInputHandle {
 
     public static void handleSkill(){
         for (KeyState key : keys){
-            if (key.wasPressed() && hasWeapon){
+            if (key.wasPressed() && hasWeapon && SpellSelectionProvider.customGui()){
                 // 使用 SpellGroupData 获取当前组索引，确保与 ClientScrollData 同步
                 int currentGroupIndex = SpellGroupData.getCurrentGroupIndex();
                 int slotIndexInGroup = keys.indexOf(key);
@@ -123,7 +126,7 @@ public class ClientInputHandle {
                 SpellSelectionManager spellSelectionManager = ClientMagicData.getSpellSelectionManager();
                 if (spellSelectionManager != null) {
                     // 更新本地选择索引，确保UI同步
-                    spellSelectionManager.makeSelection(i);
+//                    spellSelectionManager.makeSelection(first);
                 }
                 
                 // 发送快速施法包到服务器

@@ -29,9 +29,12 @@ public class SpellGroupData {
      */
     public static void init(SpellSelectionManager spellManager) {
         manager = spellManager;
-        spells = manager.getAllSpells().stream()
-                .map(selectionOption -> selectionOption.spellData)
-                .toList();
+        if (manager !=null){
+            spells = manager.getAllSpells().stream()
+                    .map(selectionOption -> selectionOption.spellData)
+                    .toList();
+        }
+
         update();
     }
     

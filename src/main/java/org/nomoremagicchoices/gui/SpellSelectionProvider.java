@@ -30,7 +30,7 @@ public class SpellSelectionProvider implements LayeredDraw.Layer {
     public void render(@NotNull GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         if (ClientConfig.ENABLE_CUSTOM_UI.get()){
             // 法术数量少于阈值时使用自定义UI
-            if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get()){
+            if (customGui()){
                 customLayer.render(guiGraphics, deltaTracker);
             }
         }
@@ -47,11 +47,21 @@ public class SpellSelectionProvider implements LayeredDraw.Layer {
         if (event.getLayer() instanceof SpellBarOverlay){
             if (ClientConfig.ENABLE_CUSTOM_UI.get()) {
                 // 法术数量少于阈值时取消原版UI（使用自定义UI）
-                if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get()){
+                if (customGui()){
                     event.setCanceled(true);
                 }
                 // 否则（法术数量 >= 阈值）不取消，使用原版UI
             }
         }
+    }
+
+    /**
+     * 法术小于配置的值
+     * @return ture 运行，false 不运行
+     */
+    public static boolean customGui(){
+        if (ClientMagicData.getSpellSelectionManager() == null) return false;
+
+        return ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get();
     }
 }
