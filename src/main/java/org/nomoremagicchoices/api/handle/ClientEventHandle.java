@@ -12,7 +12,7 @@ import org.nomoremagicchoices.Nomoremagicchoices;
 
 import org.nomoremagicchoices.api.selection.ClientData;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class ClientEventHandle {
 
     @SubscribeEvent

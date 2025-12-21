@@ -105,10 +105,4 @@ public class SpellSelectionLayerV2 implements ILayerState {
                      event.getTextureWidth(), event.getTextureHeight());
 
     }
-
-
-    @Override
-    public void render(ForgeGui forgeGui, GuiGraphics guiGraphics, float v, int i, int i1) {
-
-    }
 }

@@ -26,7 +26,7 @@ import org.nomoremagicchoices.player.ModKeyMapping;
 import java.util.List;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
-@OnlyIn(Dist.CLIENT)
+@OnlyIn(value = Dist.CLIENT)
 public class ClientInputHandle {
 
     private static final KeyState SKILL_1 = getKeyState(ModKeyMapping.SKILL_1.get());

@@ -21,7 +21,7 @@ import org.nomoremagicchoices.config.ClientConfig;
 public class SpellSelectionProvider implements IGuiOverlay {
 
 
-    public static SpellSelectionProvider instance = new SpellSelectionProvider();
+    public static final SpellSelectionProvider instance = new SpellSelectionProvider();
     private final ILayerState customLayer;
 
     public SpellSelectionProvider() {
@@ -30,23 +30,8 @@ public class SpellSelectionProvider implements IGuiOverlay {
     }
 
 
-    public void render(@NotNull GuiGraphics guiGraphics, float deltaTracker) {
-        if (ClientConfig.ENABLE_CUSTOM_UI.get()){
-            // 法术数量少于阈值时使用自定义UI
-            if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get()){
-                customLayer.render1(guiGraphics, deltaTracker);
-            }
-        }
-    }
-
-
-
-    public ILayerState getCustomLayer() {
-        return customLayer;
-    }
-
     @SubscribeEvent
-    public static void RenderGuiEvent(RenderGuiOverlayEvent event) {
+    public static void RenderGuiEvent(RenderGuiOverlayEvent.Pre event) {
         if (event.getOverlay().overlay() instanceof SpellBarOverlay){
             if (ClientConfig.ENABLE_CUSTOM_UI.get()) {
                 // 法术数量少于阈值时取消原版UI（使用自定义UI）
@@ -58,8 +43,18 @@ public class SpellSelectionProvider implements IGuiOverlay {
         }
     }
 
+
+
+
     @Override
     public void render(ForgeGui forgeGui, GuiGraphics guiGraphics, float v, int i, int i1) {
 
+        if (ClientConfig.ENABLE_CUSTOM_UI.get()){
+            // 法术数量少于阈值时使用自定义UI
+            if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get()){
+                customLayer.render1(guiGraphics, v);
+            }
+        }
     }
+
 }

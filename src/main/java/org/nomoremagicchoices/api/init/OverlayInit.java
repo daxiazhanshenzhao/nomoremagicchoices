@@ -17,10 +17,8 @@ public class OverlayInit {
     @SubscribeEvent
     public static void onRegisterOverlays(RegisterGuiOverlaysEvent event) {
 
-        event.registerBelow(
-                VanillaGuiOverlay.EXPERIENCE_BAR.id(),
-            "spell_selection",
-            SpellSelectionProvider.instance
-        );
+        event.registerAbove(VanillaGuiOverlay.EXPERIENCE_BAR.id(), "spell_selection_new", SpellSelectionProvider.instance);
     }
 }
+
+
