@@ -3,8 +3,7 @@ package org.nomoremagicchoices.api.selection;
 import io.redspace.ironsspellbooks.registries.ComponentRegistry;
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.common.NeoForge;
-import org.nomoremagicchoices.Nomoremagicchoices;
-import org.nomoremagicchoices.api.handle.ChangeHandEvent;
+import org.nomoremagicchoices.api.event.ChangeHandEvent;
 import org.nomoremagicchoices.api.init.TagInit;
 
 public class ClientHandData {

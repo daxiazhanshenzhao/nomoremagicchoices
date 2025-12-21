@@ -81,10 +81,9 @@ public class ClientInputHandle {
 
     // 已移至 ClientScrollData.handleRunning() 处理，避免重复消耗按键事件
     public static void handleGroup() {
-
-        var scrollWightData = ClientData.getScrollWightData();
-        if (scrollWightData != null && scrollWightData.isTicking()) return;
-
+        // 移除isTicking检查，允许在动画期间切换组
+        // 这样可以确保玩家随时可以通过法术轮盘切换法术
+        
         while (ModKeyMapping.NEXT_GROUP.get().consumeClick()){
             SpellGroupData.add();
         }
@@ -94,8 +93,6 @@ public class ClientInputHandle {
         while (ModKeyMapping.CHANG_GROUP.get().consumeClick()){
             SpellGroupData.add();
         }
-
-
     }
 
     public static void handlePlayerHand(){
@@ -113,18 +110,23 @@ public class ClientInputHandle {
     }
 
     public static void handleSkill(){
-
         for (KeyState key : keys){
             if (key.wasPressed() && hasWeapon){
                 // 使用 SpellGroupData 获取当前组索引，确保与 ClientScrollData 同步
                 int currentGroupIndex = SpellGroupData.getCurrentGroupIndex();
                 int slotIndexInGroup = keys.indexOf(key);
-                int i = slotIndexInGroup + currentGroupIndex * 4;
+                int first = currentGroupIndex * 4;
+                int i = slotIndexInGroup + first;
 
+                // 无论是否正在施法或法术是否冷却，都更新本地选择索引
+                // 这样UI才能正确显示当前选择的法术
                 SpellSelectionManager spellSelectionManager = ClientMagicData.getSpellSelectionManager();
-                if (!ClientMagicData.isCasting()&& (ClientMagicData.getCooldownPercent(ClientMagicData.getSpellSelectionManager().getSpellData(i).getSpell()) <=0)  ) {
+                if (spellSelectionManager != null) {
+                    // 更新本地选择索引，确保UI同步
                     spellSelectionManager.makeSelection(i);
                 }
+                
+                // 发送快速施法包到服务器
                 PacketDistributor.sendToServer(new QuickCastPacket(i));
                 break;
             }

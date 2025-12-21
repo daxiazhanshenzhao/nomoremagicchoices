@@ -1,4 +1,4 @@
-package org.nomoremagicchoices.api.handle;
+package org.nomoremagicchoices.api.event;
 
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;

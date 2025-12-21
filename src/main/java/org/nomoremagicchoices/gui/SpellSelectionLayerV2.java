@@ -8,12 +8,9 @@ import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.event.RenderBgEvent;
 
 import org.nomoremagicchoices.api.selection.ClientData;
-import org.nomoremagicchoices.api.selection.ClientHandData;
 import org.nomoremagicchoices.api.selection.ILayerState;
-import org.nomoremagicchoices.api.selection.ScrollWightData;
 import org.nomoremagicchoices.config.ClientConfig;
 import org.nomoremagicchoices.gui.component.AbstractWight;
-import org.nomoremagicchoices.gui.component.ScrollSpellWight;
 
 import java.util.List;
 

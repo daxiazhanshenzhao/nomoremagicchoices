@@ -46,15 +46,32 @@ public class SpellGroupData{
         scrollData.update();
     }
 
+    private static void tickUpdate(){
 
-    public static void tick(){
+    }
+
+
+    public static void changeGroupUpdate(){
         if (manager == null) return;
 
+        // 更新法术列表
+        spells = manager.getAllSpells().stream().map(selectionOption -> selectionOption.spellData).toList();
+        selectIndex = manager.getSelectionIndex();
+        currentGroupIndex = selectIndex / SPELLS_PER_GROUP;
+        // 计算组数：向上取整的除法
+        groupCount = (spells.size() + SPELLS_PER_GROUP - 1) / SPELLS_PER_GROUP;
+        var scrollData = ClientData.getScrollWightData();
+
+        scrollData.update();
+    }
+
+    public static void tick(){
+        if (manager == null || ClientMagicData.isCasting()) return;
         var newSelectIndex = manager.getSelectionIndex();
         
         // 直接检查选择索引是否变化，这是最关键的同步点
         if (newSelectIndex != selectIndex) {
-            update();
+                            update();
         }
         // 注意：法术列表的变化现在由update()方法处理
     }
