@@ -33,7 +33,10 @@ public class SpellGroupData{
 
 
     public static void update(){
-
+        if (manager == null) return;
+        
+        // 更新法术列表
+        spells = manager.getAllSpells().stream().map(selectionOption -> selectionOption.spellData).toList();
         selectIndex = manager.getSelectionIndex();
         currentGroupIndex = selectIndex / SPELLS_PER_GROUP;
         // 计算组数：向上取整的除法
@@ -41,21 +44,19 @@ public class SpellGroupData{
         var scrollData = ClientData.getScrollWightData();
 
         scrollData.update();
-
-
-
     }
 
 
     public static void tick(){
         if (manager == null) return;
 
-         var newSpells = manager.getAllSpells().stream().map(selectionOption -> selectionOption.spellData).toList();
-         var newSelectIndex = manager.getSelectionIndex();
-
-         if (newSelectIndex != selectIndex || !newSpells.equals(spells)) {
+        var newSelectIndex = manager.getSelectionIndex();
+        
+        // 直接检查选择索引是否变化，这是最关键的同步点
+        if (newSelectIndex != selectIndex) {
             update();
-         }
+        }
+        // 注意：法术列表的变化现在由update()方法处理
     }
 
     public static List<SpellData> getCurrentSpells(){
@@ -135,4 +136,12 @@ public class SpellGroupData{
     }
 
 
+
+    //获取选择槽位的相对值（在当前组内的索引，0-3）
+    public static int getSelectIndex(){
+        if (groupCount == 0 || SPELLS_PER_GROUP == 0) {
+            return 0;
+        }
+        return selectIndex % SPELLS_PER_GROUP;
+    }
 }

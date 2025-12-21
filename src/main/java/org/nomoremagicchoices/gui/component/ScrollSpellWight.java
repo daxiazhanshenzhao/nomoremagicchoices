@@ -243,8 +243,11 @@ public class ScrollSpellWight implements IMoveWight{
         BlitContext blitContext = getContext(keyCode);
 
         if (blitContext.width() > 0 && blitContext.height() > 0) {
-            // 法杖固定显示鼠标右键（第一个法术槽）
-            if (slotIndex == 0 && handData.getState().equals(SpellSelectionState.Staff)) {
+            // 获取当前的相对选择索引
+            int selectIndex = org.nomoremagicchoices.api.selection.SpellGroupData.getSelectIndex();
+            
+            // 法杖状态下，根据getSelectIndex()值渲染鼠标右键到对应槽位
+            if (slotIndex == selectIndex && handData.getState().equals(SpellSelectionState.Staff)) {
                 BlitContext rightClickContext = getContext(1);
                 int centerX = x + 11 - rightClickContext.width() / 2;
                 context.blit(KEY_TEXTURE, centerX, y,

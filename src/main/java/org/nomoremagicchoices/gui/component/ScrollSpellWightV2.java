@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.selection.ClientHandData;
+import org.nomoremagicchoices.api.selection.SpellGroupData;
 import org.nomoremagicchoices.api.selection.SpellSelectionState;
 import org.nomoremagicchoices.player.ModKeyMapping;
 
@@ -147,8 +148,11 @@ public class ScrollSpellWightV2 extends AbstractWight{
         BlitContext blitContext = getContext(keyCode);
 
         if (blitContext.width() > 0 && blitContext.height() > 0) {
-            // 法杖固定显示鼠标右键（第一个法术槽）
-            if (slotIndex == 0 && ClientHandData.getState().equals(SpellSelectionState.Staff)) {
+            // 获取当前的相对选择索引
+            int selectIndex = SpellGroupData.getSelectIndex();
+
+            // 法杖状态下，根据getSelectIndex()值渲染鼠标右键到对应槽位
+            if (slotIndex == selectIndex && ClientHandData.getState().equals(SpellSelectionState.Staff)) {
                 BlitContext rightClickContext = getContext(1);
                 int centerX = x + 11 - rightClickContext.width() / 2;
                 context.blit(KEY_TEXTURE, centerX, y,
