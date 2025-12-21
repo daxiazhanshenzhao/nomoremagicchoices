@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.nomoremagicchoices.Nomoremagicchoices;
 
 
-@EventBusSubscriber
+@EventBusSubscriber(Dist.CLIENT)
 public class ClientData {
 
 

@@ -41,7 +41,7 @@ public class SpellGroupData{
         var scrollData = ClientData.getScrollWightData();
 
         scrollData.update();
-        Nomoremagicchoices.LOGGER.info("你他们怎么法杖这么多事情");
+
 
 
     }

@@ -18,9 +18,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.api.selection.ClientData;
-import org.nomoremagicchoices.api.selection.ScrollWightData;
 import org.nomoremagicchoices.api.selection.SpellGroupData;
-import org.nomoremagicchoices.gui.SpellSelectionLayerV1;
 import org.nomoremagicchoices.player.KeyState;
 import org.nomoremagicchoices.player.ModKeyMapping;
 
@@ -47,7 +45,7 @@ public class ClientInputHandle {
     @SubscribeEvent
     public static void onClientClick(InputEvent.Key event){
         handleSkill();
-         handleGroup();
+
 
     }
 
@@ -76,22 +74,28 @@ public class ClientInputHandle {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         handlePlayerHand();
+        handleGroup();
     }
+
+
 
     // 已移至 ClientScrollData.handleRunning() 处理，避免重复消耗按键事件
     public static void handleGroup() {
+
         var scrollWightData = ClientData.getScrollWightData();
         if (scrollWightData != null && scrollWightData.isTicking()) return;
 
-        if (ModKeyMapping.CHANG_GROUP.get().consumeClick()){
-            SpellGroupData.move(1);
-        }
-        if (ModKeyMapping.NEXT_GROUP.get().consumeClick()){
+        while (ModKeyMapping.NEXT_GROUP.get().consumeClick()){
             SpellGroupData.add();
         }
-        if (ModKeyMapping.PREV_GROUP.get().consumeClick()){
+        while (ModKeyMapping.PREV_GROUP.get().consumeClick()){
             SpellGroupData.less();
         }
+        while (ModKeyMapping.CHANG_GROUP.get().consumeClick()){
+            SpellGroupData.add();
+        }
+
+
     }
 
     public static void handlePlayerHand(){

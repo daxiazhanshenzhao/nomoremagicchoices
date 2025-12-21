@@ -1,7 +1,5 @@
 {
-  "itemGroup.nomoremagicchoices": "Example Mod Tab",
-  "block.nomoremagicchoices.example_block": "Example Block",
-  "item.nomoremagicchoices.example_item": "Example Item",
+
   "key.categories.nomoremagicchoices": "No More Magic Choices",
   "key.nomoremagicchoices.change_group": "Change Spell Group (Next)",
   "key.nomoremagicchoices.next_group": "Next Spell Group",

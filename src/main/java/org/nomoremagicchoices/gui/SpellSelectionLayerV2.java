@@ -11,6 +11,7 @@ import org.nomoremagicchoices.api.selection.ClientData;
 import org.nomoremagicchoices.api.selection.ClientHandData;
 import org.nomoremagicchoices.api.selection.ILayerState;
 import org.nomoremagicchoices.api.selection.ScrollWightData;
+import org.nomoremagicchoices.config.ClientConfig;
 import org.nomoremagicchoices.gui.component.AbstractWight;
 import org.nomoremagicchoices.gui.component.ScrollSpellWight;
 
@@ -90,6 +91,8 @@ public class SpellSelectionLayerV2 implements ILayerState {
 
     @Override
     public void renderBg(ResourceLocation texture, GuiGraphics context, int x, int y,int uOffset,int vOffset, int width, int height,int textureWidth,int textureHeight) {
+
+        if (!ClientConfig.ENABLE_BACKGROUND.get()) return;
 
         RenderBgEvent event = new RenderBgEvent(texture, context, x, y,uOffset, vOffset, width, height,textureWidth,textureHeight);
         NeoForge.EVENT_BUS.post(event);

@@ -1,13 +1,16 @@
 package org.nomoremagicchoices.player;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.redspace.ironsspellbooks.player.KeyState;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.player.Input;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.jarjar.nio.util.Lazy;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import org.lwjgl.glfw.GLFW;
 
 import javax.swing.*;
 
@@ -23,9 +26,9 @@ public class ModKeyMapping {
     public static final Lazy<KeyMapping> SKILL_3 = Lazy.of(() -> new SkillKey("key.nomoremagicchoices.skill3", 3,51, SKILL_CATEGORY));
     public static final Lazy<KeyMapping> SKILL_4 = Lazy.of(() -> new SkillKey("key.nomoremagicchoices.skill4", 4,52, SKILL_CATEGORY));
 
-    public static final Lazy<KeyMapping> CHANG_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.change_group", 54, SKILL_CATEGORY));
-    public static final Lazy<KeyMapping> NEXT_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.next_group", 262, SKILL_CATEGORY)); // Right Arrow
-    public static final Lazy<KeyMapping> PREV_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.prev_group", 263, SKILL_CATEGORY)); // Left Arrow
+    public static final Lazy<KeyMapping> CHANG_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.change_group", InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_R, SKILL_CATEGORY));
+    public static final Lazy<KeyMapping> NEXT_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.next_group", InputConstants.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_5, SKILL_CATEGORY)); // Mouse Button 5
+    public static final Lazy<KeyMapping> PREV_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.prev_group", InputConstants.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_4, SKILL_CATEGORY)); // Mouse Button 4
 
     @SubscribeEvent
     public static void onRegister(RegisterKeyMappingsEvent event) {

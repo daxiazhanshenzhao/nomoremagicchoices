@@ -5,8 +5,6 @@ import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import io.redspace.ironsspellbooks.registries.ComponentRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.api.handle.ClientInputHandle;
 
@@ -19,7 +17,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(value = Minecraft.class,priority = 999)
-@OnlyIn(Dist.CLIENT)
 public class SkillCombatMixin {
 
     /**

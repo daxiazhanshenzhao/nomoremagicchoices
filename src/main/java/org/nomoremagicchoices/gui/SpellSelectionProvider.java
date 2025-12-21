@@ -5,6 +5,7 @@ import io.redspace.ironsspellbooks.player.ClientMagicData;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.LayeredDraw;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.nomoremagicchoices.api.selection.ILayerState;
 import org.nomoremagicchoices.config.ClientConfig;
 
-@EventBusSubscriber
+@EventBusSubscriber(Dist.CLIENT)
 public class SpellSelectionProvider implements LayeredDraw.Layer {
 
 
