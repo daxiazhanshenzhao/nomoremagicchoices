@@ -154,7 +154,7 @@ dependencies {
     modImplementation "dev.kosmx.player-anim:player-animation-lib-forge:${player_animator_version}"
     modImplementation "top.theillusivec4.curios:curios-forge:${curios_version}"
 
-
+    modImplementation "top.theillusivec4.caelus:caelus:${caelus_version}"
 //    implementation ("dev.latvian.mods:rhino-forge:2001")
 //    implementation ("dev.architectury:architectury-9.2.14:forge")
 //    implementation ("dev.latvian.mods:kubejs-forge:2001")
