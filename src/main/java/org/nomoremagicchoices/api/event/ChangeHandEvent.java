@@ -1,10 +1,12 @@
 package org.nomoremagicchoices.api.event;
 
-import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.ICancellableEvent;
+
+
+import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
 import org.nomoremagicchoices.api.selection.SpellSelectionState;
 
-public class ChangeHandEvent extends Event implements ICancellableEvent {
+public class ChangeHandEvent extends Event{
 
     private final SpellSelectionState oldState;
     private SpellSelectionState newState;
@@ -24,5 +26,10 @@ public class ChangeHandEvent extends Event implements ICancellableEvent {
 
     public void setNewState(SpellSelectionState newState) {
         this.newState = newState;
+    }
+
+    @Override
+    public boolean isCancelable() {
+        return true;
     }
 }

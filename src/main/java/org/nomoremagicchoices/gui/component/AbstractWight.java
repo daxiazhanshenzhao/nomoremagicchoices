@@ -1,10 +1,11 @@
 package org.nomoremagicchoices.gui.component;
 
 import io.redspace.ironsspellbooks.api.spells.SpellData;
-import net.minecraft.client.DeltaTracker;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import org.joml.Vector2i;
+import org.joml.Math;
+
 
 import java.util.List;
 
@@ -64,7 +65,8 @@ public abstract class AbstractWight {
             }
         }
     }
-    public abstract void render(GuiGraphics context, DeltaTracker partialTick);
+    public abstract void render(GuiGraphics context, float partialTick);
+
 
 
     /**
@@ -95,7 +97,11 @@ public abstract class AbstractWight {
     abstract ResourceLocation getTexture();
 
     protected void setOffset(double offset) {
-        this.offset = Math.clamp(offset, 0, 1);
+
+        this.offset = org.joml.Math.clamp(offset,0,1);
+
+
+
     }
 
     public void addTasks(Moving moving) {
@@ -110,8 +116,8 @@ public abstract class AbstractWight {
     }
 
     public boolean compareEqualsSpell(AbstractWight target) {
-        var oldSpell = this.getGroupSpells().getFirst().getSpell();
-        var newSpell = target.getGroupSpells().getFirst().getSpell();
+        var oldSpell = this.getGroupSpells().get(0).getSpell();
+        var newSpell = target.getGroupSpells().get(0).getSpell();
 
         return oldSpell.equals(newSpell);
     }

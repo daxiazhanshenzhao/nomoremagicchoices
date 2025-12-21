@@ -3,7 +3,7 @@ package org.nomoremagicchoices.gui.component;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.redspace.ironsspellbooks.api.spells.SpellData;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
-import net.minecraft.client.DeltaTracker;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -47,8 +47,8 @@ public class ScrollSpellWightV2 extends AbstractWight{
 
 
 
-    @Override
-    public void render(GuiGraphics context, DeltaTracker partialTick) {
+
+    public void render(GuiGraphics context, float partialTick) {
         if (groupSpells == null || groupSpells.isEmpty()) {
             return;
         }
@@ -75,7 +75,7 @@ public class ScrollSpellWightV2 extends AbstractWight{
                     // 渲染Moving状态的法术，使用Down间隔（移动过程中保持紧凑）
                     // 计算平滑插值：当前offset + 本帧的部分tick进度
                     // getGameTimeDeltaPartialTick 返回 0.0-1.0 之间的值，表示当前帧在一个tick中的进度
-                    double frameProgress = partialTick.getGameTimeDeltaPartialTick(false);
+                    double frameProgress = partialTick;
                     double interpolatedOffset = offset + (frameProgress / totalTick);
 
                     var realOffset = getRealOffset(interpolatedOffset);

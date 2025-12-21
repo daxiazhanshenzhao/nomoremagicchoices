@@ -2,20 +2,23 @@ package org.nomoremagicchoices.gui;
 
 import io.redspace.ironsspellbooks.gui.overlays.SpellBarOverlay;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
-import net.minecraft.client.DeltaTracker;
+
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import org.jetbrains.annotations.NotNull;
+
+
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.nomoremagicchoices.api.selection.ILayerState;
 import org.nomoremagicchoices.config.ClientConfig;
 
-@EventBusSubscriber(Dist.CLIENT)
-public class SpellSelectionProvider implements LayeredDraw.Layer {
+@Mod.EventBusSubscriber(value = Dist.CLIENT)
+public class SpellSelectionProvider implements IGuiOverlay {
 
 
     public static SpellSelectionProvider instance = new SpellSelectionProvider();
@@ -26,12 +29,12 @@ public class SpellSelectionProvider implements LayeredDraw.Layer {
         this.customLayer = new SpellSelectionLayerV2();
     }
 
-    @Override
-    public void render(@NotNull GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+
+    public void render(@NotNull GuiGraphics guiGraphics, float deltaTracker) {
         if (ClientConfig.ENABLE_CUSTOM_UI.get()){
             // 法术数量少于阈值时使用自定义UI
             if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get()){
-                customLayer.render(guiGraphics, deltaTracker);
+                customLayer.render1(guiGraphics, deltaTracker);
             }
         }
     }
@@ -43,8 +46,8 @@ public class SpellSelectionProvider implements LayeredDraw.Layer {
     }
 
     @SubscribeEvent
-    public static void RenderGuiEvent(RenderGuiLayerEvent.Pre event) {
-        if (event.getLayer() instanceof SpellBarOverlay){
+    public static void RenderGuiEvent(RenderGuiOverlayEvent event) {
+        if (event.getOverlay().overlay() instanceof SpellBarOverlay){
             if (ClientConfig.ENABLE_CUSTOM_UI.get()) {
                 // 法术数量少于阈值时取消原版UI（使用自定义UI）
                 if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get()){
@@ -53,5 +56,10 @@ public class SpellSelectionProvider implements LayeredDraw.Layer {
                 // 否则（法术数量 >= 阈值）不取消，使用原版UI
             }
         }
+    }
+
+    @Override
+    public void render(ForgeGui forgeGui, GuiGraphics guiGraphics, float v, int i, int i1) {
+
     }
 }

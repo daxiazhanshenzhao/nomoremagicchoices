@@ -1,9 +1,11 @@
 package org.nomoremagicchoices.gui;
 
-import net.minecraft.client.DeltaTracker;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.common.MinecraftForge;
+
 import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.event.RenderBgEvent;
 
@@ -33,8 +35,8 @@ public class SpellSelectionLayerV2 implements ILayerState {
      * 渲染方法
      * 从ClientScrollData获取Widget列表并渲染
      */
-    @Override
-    public void render(GuiGraphics context, DeltaTracker partialTick) {
+
+    public void render1(GuiGraphics context, float partialTick) {
         // 更新屏幕尺寸
         var screenWidth = context.guiWidth();
         var screenHeight = context.guiHeight();
@@ -92,7 +94,7 @@ public class SpellSelectionLayerV2 implements ILayerState {
         if (!ClientConfig.ENABLE_BACKGROUND.get()) return;
 
         RenderBgEvent event = new RenderBgEvent(texture, context, x, y,uOffset, vOffset, width, height,textureWidth,textureHeight);
-        NeoForge.EVENT_BUS.post(event);
+        MinecraftForge.EVENT_BUS.post(event);
 
         if (event.isCanceled()) return;
 
@@ -105,4 +107,8 @@ public class SpellSelectionLayerV2 implements ILayerState {
     }
 
 
+    @Override
+    public void render(ForgeGui forgeGui, GuiGraphics guiGraphics, float v, int i, int i1) {
+
+    }
 }

@@ -4,18 +4,20 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.redspace.ironsspellbooks.player.KeyState;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.player.Input;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.jarjar.nio.util.Lazy;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.jarjar.nio.util.Lazy;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import org.lwjgl.glfw.GLFW;
 
 import javax.swing.*;
 
-@EventBusSubscriber(Dist.CLIENT)
-@OnlyIn(Dist.CLIENT)
+@Mod.EventBusSubscriber(value = Dist.CLIENT)
+@OnlyIn(value = Dist.CLIENT)
 public class ModKeyMapping {
 
     public static final String SKILL_CATEGORY = "key.categories.nomoremagicchoices";

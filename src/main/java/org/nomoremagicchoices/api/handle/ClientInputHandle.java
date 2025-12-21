@@ -1,21 +1,22 @@
 package org.nomoremagicchoices.api.handle;
 
-import io.redspace.ironsspellbooks.api.magic.SpellSelectionManager;
-import io.redspace.ironsspellbooks.network.casting.CancelCastPacket;
-import io.redspace.ironsspellbooks.network.casting.QuickCastPacket;
-import io.redspace.ironsspellbooks.player.ClientMagicData;
 
-import io.redspace.ironsspellbooks.registries.ComponentRegistry;
+import io.redspace.ironsspellbooks.api.magic.SpellSelectionManager;
+import io.redspace.ironsspellbooks.item.CastingItem;
+import io.redspace.ironsspellbooks.network.ServerboundQuickCast;
+import io.redspace.ironsspellbooks.player.ClientMagicData;
+import io.redspace.ironsspellbooks.setup.Messages;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.api.selection.ClientData;
 import org.nomoremagicchoices.api.selection.SpellGroupData;
@@ -24,7 +25,7 @@ import org.nomoremagicchoices.player.ModKeyMapping;
 
 import java.util.List;
 
-@EventBusSubscriber(Dist.CLIENT)
+@Mod.EventBusSubscriber(value = Dist.CLIENT)
 @OnlyIn(Dist.CLIENT)
 public class ClientInputHandle {
 
@@ -64,15 +65,10 @@ public class ClientInputHandle {
             event.setCanceled(true);
         }
     }
-    @SubscribeEvent
-    public static void rightClick(PlayerInteractEvent.RightClickItem event){
-        if (ClientMagicData.isCasting()) {
-            PacketDistributor.sendToServer(new CancelCastPacket(true));
-        }
-    }
+
 
     @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
         handlePlayerHand();
         handleGroup();
     }
@@ -102,8 +98,13 @@ public class ClientInputHandle {
             var offHand = mc.player.getOffhandItem();
 
             boolean hasSkillWeaponTag = mainHand.is(TagInit.SKILL_WEAPON);
-            boolean hasStaff = mainHand.has(ComponentRegistry.CASTING_IMPLEMENT)
-                            || offHand.has(ComponentRegistry.CASTING_IMPLEMENT);
+            boolean hasStaff = false;
+            if (mainHand.getItem() instanceof CastingItem || offHand.getItem() instanceof CastingItem) {
+                hasStaff = true;
+            }
+
+
+
 
             hasWeapon = hasSkillWeaponTag || hasStaff;
         }
@@ -127,7 +128,8 @@ public class ClientInputHandle {
                 }
                 
                 // 发送快速施法包到服务器
-                PacketDistributor.sendToServer(new QuickCastPacket(i));
+
+                Messages.sendToServer(new ServerboundQuickCast(i));
                 break;
             }
         }

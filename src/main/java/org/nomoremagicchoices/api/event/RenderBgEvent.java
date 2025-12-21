@@ -2,10 +2,10 @@ package org.nomoremagicchoices.api.event;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.ICancellableEvent;
+import net.minecraftforge.eventbus.api.Event;
 
-public class RenderBgEvent extends Event implements ICancellableEvent {
+
+public class RenderBgEvent extends Event{
 
 
     private ResourceLocation texture;
@@ -94,5 +94,10 @@ public class RenderBgEvent extends Event implements ICancellableEvent {
 
     public void setTextureWidth(int textureWidth) {
         this.textureWidth = textureWidth;
+    }
+
+    @Override
+    public boolean isCancelable() {
+        return true;
     }
 }

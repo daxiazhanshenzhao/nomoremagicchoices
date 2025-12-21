@@ -58,7 +58,7 @@ public class ScrollWightData {
     public void update(){
         List<AbstractWight> oldScrollWights = scrollWights;
         List<AbstractWight> newScrollWights = getNewScrollWights();
-        
+
         // 如果是第一次初始化，直接设置scrollWights
         if (oldScrollWights == null) {
             scrollWights = newScrollWights;
@@ -90,7 +90,7 @@ public class ScrollWightData {
                         //对Focus做处理
                         if (ClientHandData.isFocus()){
                             //组件从size-1到0（最后一个组件移动到第一个位置）
-                            if (oldScrollWights.getLast().compareEqualsSpell(oldWight) && newScrollWights.getFirst().compareEqualsSpell(newWight)){
+                            if (oldScrollWights.get(oldScrollWights.size()-1).compareEqualsSpell(oldWight) && newScrollWights.get(0).compareEqualsSpell(newWight)){
                                 var endeY = calculateCenter(0).position().y() - FOCUS_HEIGHT;
                                 var ender = new Vector2i(calculateCenter(0).position().x,endeY);
 
@@ -98,7 +98,7 @@ public class ScrollWightData {
                                 moving.endState(State.Focus);
                             }
                             //从0到其他位置（第一个组件移动到其他位置）
-                            else if(oldScrollWights.getFirst().compareEqualsSpell(oldWight) && !newScrollWights.getFirst().compareEqualsSpell(newWight)){
+                            else if(oldScrollWights.get(0).compareEqualsSpell(oldWight) && !newScrollWights.get(0).compareEqualsSpell(newWight)){
                                 // 先移动到目标位置（Down状态）
                                 moving.addPos(newContext.position());
                                 // 然后状态从Focus变为Down
@@ -259,7 +259,7 @@ public class ScrollWightData {
             //从空手切换到focus
             var endeY = calculateCenter(0).position().y();
             var ender = new Vector2i(calculateCenter(0).position().x,endeY);
-            scrollWights.getFirst()
+            scrollWights.get(0)
                     .addTasks(Moving.start()
                             .addPos(ender)
                             .endState(State.Focus));
@@ -274,7 +274,7 @@ public class ScrollWightData {
             var downY = currentFocusY - FOCUS_HEIGHT;
             var ender = new Vector2i(calculateCenter(0).position().x, currentFocusY);
 
-            scrollWights.getFirst()
+            scrollWights.get(0)
                     .addTasks(Moving.start().addPos(ender).endState(State.Down));
         }
 
@@ -296,7 +296,7 @@ public class ScrollWightData {
         if (ClientHandData.isFocus()){
             var endeY = calculateCenter(0).position().y() - FOCUS_HEIGHT;
             var ender = new Vector2i(calculateCenter(0).position().x,endeY);
-            scrollWights.getFirst()
+            scrollWights.get(0)
                     .addTasks(Moving.start()
                             .addPos(ender)
                             .endState(State.Focus));

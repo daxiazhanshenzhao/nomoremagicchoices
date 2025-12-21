@@ -2,10 +2,9 @@
   "required": true,
   "minVersion": "0.8",
   "package": "org.nomoremagicchoices.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "mixins": [
-    "MixinSpellWheelOverlay"
-  ],
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "nomoremagicchoices.refmap.json",
+  "mixins": [],
   "client": [
     "MixinSkillCombat"
   ],

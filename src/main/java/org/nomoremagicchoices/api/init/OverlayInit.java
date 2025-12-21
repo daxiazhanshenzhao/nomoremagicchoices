@@ -2,23 +2,24 @@ package org.nomoremagicchoices.api.init;
 
 
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.gui.SpellSelectionProvider;
 
-@EventBusSubscriber(Dist.CLIENT)
+@Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class OverlayInit {
 
     @SubscribeEvent
-    public static void onRegisterOverlays(RegisterGuiLayersEvent event) {
+    public static void onRegisterOverlays(RegisterGuiOverlaysEvent event) {
 
         event.registerBelow(
-            VanillaGuiLayers.EXPERIENCE_BAR,
-            ResourceLocation.fromNamespaceAndPath(Nomoremagicchoices.MODID, "spell_selection"),
+                VanillaGuiOverlay.EXPERIENCE_BAR.id(),
+            "spell_selection",
             SpellSelectionProvider.instance
         );
     }

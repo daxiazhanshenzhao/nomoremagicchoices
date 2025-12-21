@@ -1,22 +1,24 @@
 package org.nomoremagicchoices.api.handle;
 
 import net.minecraft.client.player.LocalPlayer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.api.distmarker.Dist;
+
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
+
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.nomoremagicchoices.Nomoremagicchoices;
 
 import org.nomoremagicchoices.api.selection.ClientData;
 
-@EventBusSubscriber(Dist.CLIENT)
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public class ClientEventHandle {
 
     @SubscribeEvent
-    public static void clientTickEvent(PlayerTickEvent.Pre event) {
+    public static void clientTickEvent(TickEvent.PlayerTickEvent event) {
 
-        if (event.getEntity() instanceof LocalPlayer) {
+        if (event.player instanceof LocalPlayer) {
             ClientData.tick();
 
         }

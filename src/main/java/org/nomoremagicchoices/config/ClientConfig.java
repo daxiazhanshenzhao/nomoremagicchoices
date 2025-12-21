@@ -1,20 +1,21 @@
 package org.nomoremagicchoices.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
+
 
 public class ClientConfig {
 
-    public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
-    public static final ModConfigSpec.ConfigValue<Boolean> ENABLE_CUSTOM_UI;
-    public static final ModConfigSpec.ConfigValue<Boolean> ENABLE_BACKGROUND;
+    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    public static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_CUSTOM_UI;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_BACKGROUND;
 
-    public static final ModConfigSpec.ConfigValue<Integer> CENTER_X_OFFSET;
-    public static final ModConfigSpec.ConfigValue<Integer> CENTER_Y_OFFSET;
-    public static final ModConfigSpec.ConfigValue<Integer> FOCUS_HEIGHT;
+    public static final ForgeConfigSpec.ConfigValue<Integer> CENTER_X_OFFSET;
+    public static final ForgeConfigSpec.ConfigValue<Integer> CENTER_Y_OFFSET;
+    public static final ForgeConfigSpec.ConfigValue<Integer> FOCUS_HEIGHT;
 
-    public static final ModConfigSpec.ConfigValue<Integer> MINE_CUSTOM_SPELL;
+    public static final ForgeConfigSpec.ConfigValue<Integer> MINE_CUSTOM_SPELL;
 
-    public static final ModConfigSpec SPEC;
+    public static final ForgeConfigSpec SPEC;
 
 
 

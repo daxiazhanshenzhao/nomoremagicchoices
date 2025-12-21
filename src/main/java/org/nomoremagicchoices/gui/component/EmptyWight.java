@@ -1,7 +1,7 @@
 package org.nomoremagicchoices.gui.component;
 
 import io.redspace.ironsspellbooks.api.spells.SpellData;
-import net.minecraft.client.DeltaTracker;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2i;
@@ -17,7 +17,7 @@ public class EmptyWight extends AbstractWight {
 
 
     @Override
-    public void render(GuiGraphics context, DeltaTracker partialTick) {
+    public void render(GuiGraphics context, float partialTick) {
 
     }
 

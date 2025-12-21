@@ -1,8 +1,11 @@
 package org.nomoremagicchoices.api.selection;
 
-import io.redspace.ironsspellbooks.registries.ComponentRegistry;
+import io.redspace.ironsspellbooks.item.CastingItem;
+
 import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.MinecraftForge;
+
 import org.nomoremagicchoices.api.event.ChangeHandEvent;
 import org.nomoremagicchoices.api.init.TagInit;
 
@@ -32,7 +35,7 @@ public class ClientHandData {
             newState = SpellSelectionState.EmptyHand;
         } else if (mainHand.is(TagInit.SKILL_WEAPON)) {
             newState = SpellSelectionState.Weapon;
-        } else if (mainHand.has(ComponentRegistry.CASTING_IMPLEMENT) || offHand.has(ComponentRegistry.CASTING_IMPLEMENT)) {
+        } else if (mainHand.getItem() instanceof CastingItem || offHand.getItem()  instanceof CastingItem) {
             newState = SpellSelectionState.Staff;
         } else {
             newState = SpellSelectionState.EmptyHand;
@@ -50,7 +53,7 @@ public class ClientHandData {
     public static void changeState(SpellSelectionState newState) {
 
         ChangeHandEvent event = new ChangeHandEvent(state, newState);
-        NeoForge.EVENT_BUS.post(event);
+        MinecraftForge.EVENT_BUS.post(event);
         if (event.isCanceled()) return;
 
         state = event.getNewState();
