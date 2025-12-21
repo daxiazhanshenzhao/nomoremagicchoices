@@ -4,10 +4,10 @@
   "package": "org.nomoremagicchoices.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-
+    "MixinSpellWheelOverlay"
   ],
   "client": [
-    "SkillCombatMixin"
+    "MixinSkillCombat"
   ],
   "injectors": {
     "defaultRequire": 1

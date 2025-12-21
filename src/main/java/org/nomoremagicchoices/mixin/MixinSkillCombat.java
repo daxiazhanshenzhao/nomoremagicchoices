@@ -8,16 +8,13 @@ import net.minecraft.world.entity.player.Inventory;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.api.handle.ClientInputHandle;
 
-import org.nomoremagicchoices.api.selection.ClientData;
-import org.nomoremagicchoices.api.selection.ClientHandData;
-import org.nomoremagicchoices.api.selection.ScrollWightData;
 import org.nomoremagicchoices.player.ModKeyMapping;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(value = Minecraft.class,priority = 999)
-public class SkillCombatMixin {
+public class MixinSkillCombat {
 
     /**
      * 拦截原版的 this.player.getInventory().selected = i; 操作
