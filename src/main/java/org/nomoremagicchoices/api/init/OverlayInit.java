@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.gui.SpellSelectionProvider;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT)
+@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD, modid = Nomoremagicchoices.MODID)
 public class OverlayInit {
 
     @SubscribeEvent

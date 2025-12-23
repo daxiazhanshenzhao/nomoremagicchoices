@@ -13,11 +13,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.jarjar.nio.util.Lazy;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import org.lwjgl.glfw.GLFW;
+import org.nomoremagicchoices.Nomoremagicchoices;
 
 import javax.swing.*;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT)
-@OnlyIn(value = Dist.CLIENT)
+@Mod.EventBusSubscriber(value = Dist.CLIENT, modid = Nomoremagicchoices.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModKeyMapping {
 
     public static final String SKILL_CATEGORY = "key.categories.nomoremagicchoices";

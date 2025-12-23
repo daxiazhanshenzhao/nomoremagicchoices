@@ -14,10 +14,11 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.selection.ILayerState;
 import org.nomoremagicchoices.config.ClientConfig;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT)
+
 public class SpellSelectionProvider implements IGuiOverlay {
 
 
@@ -29,32 +30,23 @@ public class SpellSelectionProvider implements IGuiOverlay {
         this.customLayer = new SpellSelectionLayerV2();
     }
 
-
-    @SubscribeEvent
-    public static void RenderGuiEvent(RenderGuiOverlayEvent.Pre event) {
-        if (event.getOverlay().overlay() instanceof SpellBarOverlay){
-            if (ClientConfig.ENABLE_CUSTOM_UI.get()) {
-                // 法术数量少于阈值时取消原版UI（使用自定义UI）
-                if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get()){
-                    event.setCanceled(true);
-                }
-                // 否则（法术数量 >= 阈值）不取消，使用原版UI
-            }
-        }
-    }
-
-
-
-
     @Override
     public void render(ForgeGui forgeGui, GuiGraphics guiGraphics, float v, int i, int i1) {
 
+        Nomoremagicchoices.LOGGER.info("Rendering Spell Selection Layer");
+    }
+
+
+    public void render(GuiGraphics context,float parTick){
         if (ClientConfig.ENABLE_CUSTOM_UI.get()){
             // 法术数量少于阈值时使用自定义UI
             if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get()){
-                customLayer.render1(guiGraphics, v);
+                customLayer.render1(context, parTick);
             }
         }
     }
+
+
+
 
 }
