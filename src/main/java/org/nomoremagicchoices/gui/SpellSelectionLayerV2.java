@@ -1,5 +1,6 @@
 package org.nomoremagicchoices.gui;
 
+import io.redspace.ironsspellbooks.player.ClientMagicData;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -90,6 +91,7 @@ public class SpellSelectionLayerV2 implements ILayerState {
     public void renderBg(ResourceLocation texture, GuiGraphics context, int x, int y,int uOffset,int vOffset, int width, int height,int textureWidth,int textureHeight) {
 
         if (!ClientConfig.ENABLE_BACKGROUND.get()) return;
+        if(ClientMagicData.getSpellSelectionManager().getAllSpells().size() <=0) return;
 
         RenderBgEvent event = new RenderBgEvent(texture, context, x, y,uOffset, vOffset, width, height,textureWidth,textureHeight);
         NeoForge.EVENT_BUS.post(event);
