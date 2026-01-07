@@ -6,7 +6,7 @@
   "refmap": "nomoremagicchoices.refmap.json",
   "mixins": [],
   "client": [
-
+    "MixinSkillCombat"
   ],
   "injectors": {
     "defaultRequire": 1
