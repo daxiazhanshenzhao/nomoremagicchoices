@@ -33,7 +33,7 @@ public class SpellSelectionProvider implements IGuiOverlay {
     @Override
     public void render(ForgeGui forgeGui, GuiGraphics guiGraphics, float v, int i, int i1) {
 
-        Nomoremagicchoices.LOGGER.info("Rendering Spell Selection Layer");
+//        Nomoremagicchoices.LOGGER.info("Rendering Spell Selection Layer");
     }
 
 

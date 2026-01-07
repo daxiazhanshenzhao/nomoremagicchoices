@@ -56,6 +56,7 @@ public class ClientInputHandle {
      * 这样可以防止施法期间误操作切换物品导致施法中断
      * 同时允许其他情况下（如空手、持有普通物品）正常使用滚轮
      */
+    @Deprecated
     @SubscribeEvent
     public static void scrollEvent(InputEvent.MouseScrollingEvent event){
 
@@ -65,6 +66,7 @@ public class ClientInputHandle {
             event.setCanceled(true);
         }
     }
+
 
 
     @SubscribeEvent
@@ -103,9 +105,6 @@ public class ClientInputHandle {
                 hasStaff = true;
             }
 
-
-
-
             hasWeapon = hasSkillWeaponTag || hasStaff;
         }
     }
@@ -124,7 +123,7 @@ public class ClientInputHandle {
                 SpellSelectionManager spellSelectionManager = ClientMagicData.getSpellSelectionManager();
                 if (spellSelectionManager != null) {
                     // 更新本地选择索引，确保UI同步
-                    spellSelectionManager.makeSelection(i);
+//                    spellSelectionManager.makeSelection(i);
                 }
                 
                 // 发送快速施法包到服务器
