@@ -109,7 +109,7 @@ public class ClientInputHandle {
         update();
 
         for (KeyState key : keys){
-            while(key.wasPressed()){
+            while(key.getKey().consumeClick()){
                 if (hasWeapon && SpellSelectionProvider.customGui()){
                     // 使用 SpellGroupData 获取当前组索引，确保与 ClientScrollData 同步
                     int currentGroupIndex = SpellGroupData.getCurrentGroupIndex();
