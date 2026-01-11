@@ -1,6 +1,5 @@
 package org.nomoremagicchoices.api.handle;
 
-import io.redspace.ironsspellbooks.api.magic.SpellSelectionManager;
 import io.redspace.ironsspellbooks.network.casting.CancelCastPacket;
 import io.redspace.ironsspellbooks.network.casting.QuickCastPacket;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
@@ -17,9 +16,7 @@ import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.nomoremagicchoices.api.init.TagInit;
-import org.nomoremagicchoices.api.selection.ClientData;
 import org.nomoremagicchoices.api.selection.SpellGroupData;
-import org.nomoremagicchoices.config.ClientConfig;
 import org.nomoremagicchoices.gui.SpellSelectionProvider;
 import org.nomoremagicchoices.player.KeyState;
 import org.nomoremagicchoices.player.ModKeyMapping;
@@ -44,13 +41,6 @@ public class ClientInputHandle {
             SKILL_4
     );
 
-    @SubscribeEvent
-    public static void onClientClick(InputEvent.Key event){
-        handleSkill();
-
-
-    }
-
     /**
      * 处理滚轮事件
      * 只在持有技能武器/法杖且正在施法时取消滚轮切换物品栏
@@ -66,6 +56,7 @@ public class ClientInputHandle {
             event.setCanceled(true);
         }
     }
+
     @SubscribeEvent
     public static void rightClick(PlayerInteractEvent.RightClickItem event){
         if (ClientMagicData.isCasting()) {
@@ -77,6 +68,7 @@ public class ClientInputHandle {
     public static void onClientTick(ClientTickEvent.Post event) {
         handlePlayerHand();
         handleGroup();
+        handleSkill(); // 在 ClientTick 中处理技能按键，适配鼠标操作
     }
 
 
@@ -113,29 +105,24 @@ public class ClientInputHandle {
     }
 
     public static void handleSkill(){
-        for (KeyState key : keys){
-            if (key.wasPressed() && hasWeapon && SpellSelectionProvider.customGui()){
-                // 使用 SpellGroupData 获取当前组索引，确保与 ClientScrollData 同步
-                int currentGroupIndex = SpellGroupData.getCurrentGroupIndex();
-                int slotIndexInGroup = keys.indexOf(key);
-                int first = currentGroupIndex * 4;
-                int i = slotIndexInGroup + first;
+        // 先更新所有按键状态
+        update();
 
-                // 无论是否正在施法或法术是否冷却，都更新本地选择索引
-                // 这样UI才能正确显示当前选择的法术
-                SpellSelectionManager spellSelectionManager = ClientMagicData.getSpellSelectionManager();
-                if (spellSelectionManager != null) {
-                    // 更新本地选择索引，确保UI同步
-//                    spellSelectionManager.makeSelection(first);
+        for (KeyState key : keys){
+            while(key.wasPressed()){
+                if (hasWeapon && SpellSelectionProvider.customGui()){
+                    // 使用 SpellGroupData 获取当前组索引，确保与 ClientScrollData 同步
+                    int currentGroupIndex = SpellGroupData.getCurrentGroupIndex();
+                    int slotIndexInGroup = keys.indexOf(key);
+                    int first = currentGroupIndex * 4;
+                    int i = slotIndexInGroup + first;
+
+                    // 发送快速施法包到服务器
+                    PacketDistributor.sendToServer(new QuickCastPacket(i));
+                    break;
                 }
-                
-                // 发送快速施法包到服务器
-                PacketDistributor.sendToServer(new QuickCastPacket(i));
-                break;
             }
         }
-
-        update();
     }
 
     public static KeyState getKeyState(KeyMapping key){
