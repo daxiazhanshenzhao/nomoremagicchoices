@@ -40,7 +40,7 @@ public class SpellSelectionProvider implements IGuiOverlay {
     public void render(GuiGraphics context,float parTick){
         if (ClientConfig.ENABLE_CUSTOM_UI.get()){
             // 法术数量少于阈值时使用自定义UI
-            if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get() || ClientMagicData.getSpellSelectionManager().getAllSpells().size() !=0){
+            if (ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get() && !ClientMagicData.getSpellSelectionManager().getAllSpells().isEmpty()){
                 customLayer.render1(context, parTick);
             }
         }
