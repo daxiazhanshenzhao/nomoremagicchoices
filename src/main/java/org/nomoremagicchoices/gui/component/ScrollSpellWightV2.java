@@ -29,10 +29,13 @@ public class ScrollSpellWightV2 extends AbstractWight{
     /** Focus状态下的法术槽水平间隔（像素） */
     public static final int SPELL_SPACING_FOCUS = 22;
 
+    /** 该widget对应的组索引（用于判断是否为当前激活的组） */
+    private final int groupIndex;
 
 
-    public ScrollSpellWightV2(WightContext center, List<SpellData> groupSpells,int totalTick){
+    public ScrollSpellWightV2(WightContext center, List<SpellData> groupSpells, int totalTick, int groupIndex){
         super(center,groupSpells,totalTick);
+        this.groupIndex = groupIndex;
     }
 
     @Override
@@ -54,28 +57,42 @@ public class ScrollSpellWightV2 extends AbstractWight{
         }
         var state = center.state();
 
-
         // 根据状态选择法术间隔
         int spacing = (state == State.Focus) ? SPELL_SPACING_FOCUS : SPELL_SPACING_DOWN;
 
-        // 为每个法术设置不同的X坐标，避免重叠
+        // 用于记录需要在顶层渲染的 Focus slot（EmptyHand状态下的选中法术）
+        int focusSlotIndex = -1;
+        SpellData focusSpellData = null;
+        int focusX = 0;
+        int focusY = 0;
+
+        // 第一阶段：渲染所有普通 slot
         int slotIndex = 0;
-
-
         for (SpellData spellData : groupSpells){
             // 计算法术槽的X偏移量
             int slotOffsetX = slotIndex * spacing;
 
             switch (state){
                 case Down:
-                    // 渲染Down状态的法术，使用Down间隔
-                    // 如果是EmptyHand状态（法术收起），为当前选中的法术渲染Focus边框
-                    renderSlot(context, spellData, center.position().x + slotOffsetX, center.position().y, slotIndex);
+                    // 检查是否是需要Focus渲染的slot
+                    boolean isFocusSlot = ClientHandData.getState().equals(SpellSelectionState.EmptyHand)
+                                       && slotIndex == SpellGroupData.getSelectIndex()
+                                       && groupIndex == SpellGroupData.getCurrentGroupIndex();
+
+                    if (isFocusSlot) {
+                        // 记录Focus slot信息，稍后在顶层渲染
+                        focusSlotIndex = slotIndex;
+                        focusSpellData = spellData;
+                        focusX = center.position().x + slotOffsetX;
+                        focusY = center.position().y;
+                    } else {
+                        // 渲染普通slot
+                        renderSlot(context, spellData, center.position().x + slotOffsetX, center.position().y, slotIndex);
+                    }
                     break;
                 case Moving:
                     // 渲染Moving状态的法术，使用Down间隔（移动过程中保持紧凑）
                     // 计算平滑插值：当前offset + 本帧的部分tick进度
-                    // getGameTimeDeltaPartialTick 返回 0.0-1.0 之间的值，表示当前帧在一个tick中的进度
                     double frameProgress = partialTick.getGameTimeDeltaPartialTick(false);
                     double interpolatedOffset = offset + (frameProgress / totalTick);
 
@@ -94,6 +111,11 @@ public class ScrollSpellWightV2 extends AbstractWight{
             }
 
             slotIndex++;
+        }
+
+        // 第二阶段：在顶层渲染 Focus slot（如果存在）
+        if (focusSlotIndex != -1 && focusSpellData != null) {
+            renderSlot(context, focusSpellData, focusX, focusY, focusSlotIndex);
         }
 
     }
@@ -166,8 +188,12 @@ public class ScrollSpellWightV2 extends AbstractWight{
         int selectIndex = SpellGroupData.getSelectIndex();
 
         // 判断是否需要渲染 Focus 边框
-        boolean shouldRenderFocusBorder = handState.equals(SpellSelectionState.EmptyHand)
-                                         && slotIndex == selectIndex;
+        // 关键修复：只有当前激活的组（groupIndex == getCurrentGroupIndex()）
+        // 且处于 Down 状态、EmptyHand 状态、槽位索引匹配时，才渲染 Focus 边框
+        boolean shouldRenderFocusBorder = center.state().equals(State.Down)
+                                         && handState.equals(SpellSelectionState.EmptyHand)
+                                         && slotIndex == selectIndex
+                                         && groupIndex == SpellGroupData.getCurrentGroupIndex();
 
         //框：如果是EmptyHand状态且是当前选中的法术，使用Focus边框
         if (shouldRenderFocusBorder) {

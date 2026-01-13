@@ -177,7 +177,7 @@ public class ScrollWightData {
         List<AbstractWight> scrollWights = NonNullList.withSize(groupCount, EmptyWight.EMPTY);
 
         // 填充当前组（放在索引0位置）
-        scrollWights.set(0,new ScrollSpellWightV2(calculateCenter(0),SpellGroupData.getIndexSpells(cIndex),3));
+        scrollWights.set(0, new ScrollSpellWightV2(calculateCenter(0), SpellGroupData.getIndexSpells(cIndex), 3, cIndex));
 
         // 填充当前组之后的组
         int scrollIndex = 1;
@@ -187,7 +187,8 @@ public class ScrollWightData {
             scrollWights.set(scrollIndex, new ScrollSpellWightV2(
                 wightContext,
                 SpellGroupData.getIndexSpells(afterGroupIndex),
-                3
+                3,
+                afterGroupIndex
             ));
             scrollIndex++;
         }
@@ -199,7 +200,8 @@ public class ScrollWightData {
             scrollWights.set(scrollIndex, new ScrollSpellWightV2(
                 wightContext,
                 SpellGroupData.getIndexSpells(beforeGroupIndex),
-                    3
+                3,
+                beforeGroupIndex
             ));
             scrollIndex++;
         }
