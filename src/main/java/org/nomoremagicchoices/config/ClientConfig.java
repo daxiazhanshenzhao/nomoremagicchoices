@@ -21,7 +21,9 @@ public class ClientConfig {
     
     // Spell system configuration
     public static final ModConfigSpec.ConfigValue<Integer> MINE_CUSTOM_SPELL;
-    
+
+    public static final ModConfigSpec.ConfigValue<Integer> SPEED_LINE_MODE;
+
     public static final ModConfigSpec SPEC;
     
     static {
@@ -80,7 +82,25 @@ public class ClientConfig {
                         "Set to 0: Completely use vanilla system",
                         "Set to a large value (e.g., 999): All spells use custom UI")
                 .define("Mine Custom Spell Limit", 8);
-        
+
+        // Animation easing mode
+        // Controls the movement curve/animation effect when spell slots transition between states
+        // Different modes provide different visual effects:
+        //   0 - Smoothstep (Default): Smooth acceleration and deceleration, natural and balanced
+        //   1 - EaseOutBack: Fast approach with overshoot bounce effect, dynamic and lively
+        //   2 - EaseOutCubic: Fast start with smooth end, no bounce
+        //   Others - Linear: Constant speed movement, simple and direct
+        SPEED_LINE_MODE = BUILDER
+                .comment("Animation easing mode for spell slot transitions",
+                        "Controls the movement animation curve when spell groups move between states",
+                        "Available modes:",
+                        "  0 - Smoothstep: Smooth acceleration and deceleration (recommended for most users)",
+                        "  1 - EaseOutBack: Fast movement with ~20% overshoot bounce effect (dynamic, eye-catching)",
+                        "  2 - EaseOutCubic: Fast start, smooth stop, no bounce (quick and clean)",
+                        "  Other values - Linear: Constant speed (simple, no easing)",
+                        "Default: 0 (Smoothstep)")
+                .defineInRange("Speed Line Mode", 0, 0, 2);
+
         SPEC = BUILDER.build();
     }
 }

@@ -11,9 +11,9 @@ import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.selection.ClientHandData;
 import org.nomoremagicchoices.api.selection.SpellGroupData;
 import org.nomoremagicchoices.api.selection.SpellSelectionState;
+import org.nomoremagicchoices.config.ClientConfig;
 import org.nomoremagicchoices.player.ModKeyMapping;
 
-import javax.swing.plaf.PanelUI;
 import java.util.List;
 
 import static org.nomoremagicchoices.gui.component.KeyHp.getContext;
@@ -99,7 +99,33 @@ public class ScrollSpellWightV2 extends AbstractWight{
 
     @Override
     double getRealOffset(double interpolatedOffset) {
-        return Math.min(interpolatedOffset * interpolatedOffset * (3.0 - 2.0 * interpolatedOffset),1.0) ;
+        // 确保输入在 [0, 1] 范围内
+        interpolatedOffset = Math.clamp(interpolatedOffset, 0.0, 1.0);
+
+        switch (ClientConfig.SPEED_LINE_MODE.get()){
+            case 0:
+                // smoothstep 缓动：平滑加速和减速
+                return interpolatedOffset * interpolatedOffset * (3.0 - 2.0 * interpolatedOffset);
+            case 1:
+                // easeOutBack 缓动：快速到达目标，超出到 1.2 倍后回弹
+                // c1 控制回弹强度，调整到 3.5 使超出量达到约 1.2 倍
+                double c1 = 3.5;
+                double c3 = c1 + 1.0;
+
+                double easeOutBackResult = 1.0 + c3 * Math.pow(interpolatedOffset - 1.0, 3)
+                                         + c1 * Math.pow(interpolatedOffset - 1.0, 2);
+
+                // 调试日志：查看输入输出关系（每 10% 打印一次）
+                if (Math.abs(interpolatedOffset - Math.round(interpolatedOffset * 10) / 10.0) < 0.01) {
+                    System.out.printf("easeOutBack: input=%.2f -> output=%.4f (max overshoot: ~1.2)%n",
+                                    interpolatedOffset, easeOutBackResult);
+                }
+
+                return easeOutBackResult;
+            default:
+                return interpolatedOffset;
+        }
+
     }
 
 
