@@ -69,7 +69,8 @@ public class ScrollSpellWightV2 extends AbstractWight{
             switch (state){
                 case Down:
                     // 渲染Down状态的法术，使用Down间隔
-                    renderSlot(context, spellData, center.position().x + slotOffsetX, center.position().y);
+                    // 如果是EmptyHand状态（法术收起），为当前选中的法术渲染Focus边框
+                    renderSlot(context, spellData, center.position().x + slotOffsetX, center.position().y, slotIndex);
                     break;
                 case Moving:
                     // 渲染Moving状态的法术，使用Down间隔（移动过程中保持紧凑）
@@ -83,11 +84,11 @@ public class ScrollSpellWightV2 extends AbstractWight{
                     int x = getXPosition(realOffset) + slotOffsetX;
                     int y = getYPosition(realOffset);
 
-                    renderSlot(context, spellData, x, y);
+                    renderSlot(context, spellData, x, y, slotIndex);
                     break;
                 case Focus:
                     // 渲染Focus状态的法术，使用Focus间隔（更宽松）
-                    renderSlot(context, spellData, center.position().x + slotOffsetX-3, center.position().y);
+                    renderSlot(context, spellData, center.position().x + slotOffsetX-3, center.position().y, slotIndex);
                     renderKey(context, slotIndex, center.position().x + slotOffsetX-3, center.position().y -14+2+3);
                     break;
             }
@@ -112,16 +113,8 @@ public class ScrollSpellWightV2 extends AbstractWight{
                 double c1 = 3.5;
                 double c3 = c1 + 1.0;
 
-                double easeOutBackResult = 1.0 + c3 * Math.pow(interpolatedOffset - 1.0, 3)
+                return 1.0 + c3 * Math.pow(interpolatedOffset - 1.0, 3)
                                          + c1 * Math.pow(interpolatedOffset - 1.0, 2);
-
-                // 调试日志：查看输入输出关系（每 10% 打印一次）
-                if (Math.abs(interpolatedOffset - Math.round(interpolatedOffset * 10) / 10.0) < 0.01) {
-                    System.out.printf("easeOutBack: input=%.2f -> output=%.4f (max overshoot: ~1.2)%n",
-                                    interpolatedOffset, easeOutBackResult);
-                }
-
-                return easeOutBackResult;
             default:
                 return interpolatedOffset;
         }
@@ -154,6 +147,65 @@ public class ScrollSpellWightV2 extends AbstractWight{
                 context.blit(TEXTURE, x, y, 88, 84, 22, 22);
             }else {
                 context.blit(TEXTURE, x +1, y + 1, 156, 85, 20, 20);
+            }
+        }
+    }
+
+    /**
+     * 渲染法术槽（带槽位索引，用于EmptyHand状态下高亮当前选中的法术）
+     * @param context 图形上下文
+     * @param spell 法术数据
+     * @param x X坐标
+     * @param y Y坐标
+     * @param slotIndex 槽位索引（0-3）
+     */
+    public void renderSlot(GuiGraphics context, SpellData spell, int x, int y, int slotIndex){
+        // 获取当前手持状态
+        SpellSelectionState handState = ClientHandData.getState();
+        // 获取当前选中的法术索引（相对索引 0-3）
+        int selectIndex = SpellGroupData.getSelectIndex();
+
+        // 判断是否需要渲染 Focus 边框
+        boolean shouldRenderFocusBorder = handState.equals(SpellSelectionState.EmptyHand)
+                                         && slotIndex == selectIndex;
+
+        //框：如果是EmptyHand状态且是当前选中的法术，使用Focus边框
+        if (shouldRenderFocusBorder) {
+            // 渲染Focus边框（更粗的金色边框）
+            context.blit(TEXTURE, x, y, 88, 84, 22, 22);
+        } else {
+            // 渲染普通边框
+            context.blit(TEXTURE, x, y, 22, 84, 22, 22);
+        }
+
+        //法术图标
+        context.blit(spell.getSpell().getSpellIconResource(),
+                x + 3, y + 3,
+                0, 0, 16, 16, 16, 16);
+
+        //绘制冷却条
+        float cooldownPercent = ClientMagicData.getCooldownPercent(spell.getSpell());
+        if (cooldownPercent > 0) {
+            RenderSystem.enableBlend();
+            int pixels = (int) (16 * cooldownPercent + 1.0F);
+
+            // Focus状态或EmptyHand选中状态下，冷却框也要特殊处理
+            if (center.state().equals(State.Focus) || shouldRenderFocusBorder) {
+                context.blit(TEXTURE, x, y, 66, 84, 22, 22);
+            }
+
+            context.blit(TEXTURE, x + 3, y + 3 + 16 - pixels, 47, 87 + 16 - pixels, 16, pixels);
+        }
+
+        //绘制冷却框（无冷却时）
+        if (cooldownPercent <= 0){
+            // 不需要再次渲染Focus边框，因为上面已经渲染过了
+            if (!shouldRenderFocusBorder) {
+                if (center.state().equals(State.Focus)) {
+                    context.blit(TEXTURE, x, y, 88, 84, 22, 22);
+                } else {
+                    context.blit(TEXTURE, x + 1, y + 1, 156, 85, 20, 20);
+                }
             }
         }
     }

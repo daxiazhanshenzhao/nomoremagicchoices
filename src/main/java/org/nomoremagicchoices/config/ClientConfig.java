@@ -110,86 +110,85 @@ public class ClientConfig {
     public static final ModConfigSpec SPEC;
     
     static {
-        // Enable custom UI
-        // If true, use custom spell selection UI; if false, use vanilla UI
+        // ========== UI Display Settings ==========
+
         ENABLE_CUSTOM_UI = BUILDER
                 .comment("Enable custom spell selection interface",
                         "true: Use custom UI",
-                        "false: Use vanilla UI")
+                        "false: Use vanilla UI",
+                        "Default: true")
                 .define("Enable Custom Bar", true);
         
-        // Enable background rendering
-        // Controls whether to render the background of the spell selection interface
         ENABLE_BACKGROUND = BUILDER
                 .comment("Enable spell selection interface background",
                         "true: Render background",
-                        "false: Do not render background")
+                        "false: Do not render background",
+                        "Default: true")
                 .define("Enable Background", true);
 
+        // ========== Position Offset Settings ==========
 
-        //positon
         BACKGROUND_X_OFFSET = BUILDER
                 .comment("Background X Offset",
                         "Horizontal offset of the spell selection background",
-                        "Unit: pixels")
+                        "Positive: right, Negative: left",
+                        "Unit: pixels",
+                        "Default: 0")
                 .define("Background X Offset", 0);
 
         BACKGROUND_Y_OFFSET = BUILDER
                 .comment("Background Y Offset",
                         "Vertical offset of the spell selection background",
-                        "Unit: pixels")
+                        "Positive: down, Negative: up",
+                        "Unit: pixels",
+                        "Default: 0")
                 .define("Background Y Offset", 0);
 
         SPELL_X_OFFSET = BUILDER
                 .comment("Spell X Offset",
-                        "Horizontal offset of the spell icons",
-                        "Unit: pixels")
+                        "Horizontal offset of spell icons (independent of background)",
+                        "Positive: right, Negative: left",
+                        "Unit: pixels",
+                        "Default: 0")
                 .define("Spell X Offset", 0);
 
         SPELL_Y_OFFSET = BUILDER
                 .comment("Spell Y Offset",
-                        "Vertical offset of the spell icons",
-                        "Unit: pixels")
+                        "Vertical offset of spell icons (independent of background)",
+                        "Positive: down, Negative: up",
+                        "Unit: pixels",
+                        "Default: 0")
                 .define("Spell Y Offset", 0);
 
+        // ========== Animation and Interaction Settings ==========
 
-        // Focus state height
-        // Additional upward movement height when the spell group is in focus state
         FOCUS_HEIGHT = BUILDER
                 .comment("Focus state additional height",
-                        "Height that the spell group moves up when it gains focus",
-                        "Unit: pixels")
+                        "Height that the spell group moves up when focused",
+                        "Larger values = more noticeable, recommended range: 5-20",
+                        "Unit: pixels",
+                        "Default: 10")
                 .define("Focus Height", 10);
         
-        // Custom spell count limit
-        // When the number of spells learned by the player exceeds this value,
-        // spells beyond this limit will be handled by the vanilla system
-        // Example: When set to 8, the first 8 spells use custom UI,
-        // spells from the 9th onward use the vanilla system
         MINE_CUSTOM_SPELL = BUILDER
                 .comment("Custom spell count limit",
-                        "Controls the maximum number of spells that use custom UI",
-                        "Spells beyond this limit will fall back to the vanilla system",
-                        "Default: 8 (first 8 spells use custom UI)",
-                        "Set to 0: Completely use vanilla system",
-                        "Set to a large value (e.g., 999): All spells use custom UI")
-                .define("Mine Custom Spell Limit", 8);
+                        "Controls the number of spell slots using custom UI",
+                        "Spells beyond this limit will fall back to vanilla system",
+                        "Examples:",
+                        "  8 (default): First 8 spells use custom UI",
+                        "  0: Completely use vanilla system",
+                        "  999: All spells use custom UI",
+                        "Default: 8")
+                .define("Mine Custom Spell Limit", 9);
 
-        // Animation easing mode
-        // Controls the movement curve/animation effect when spell slots transition between states
-        // Different modes provide different visual effects:
-        //   0 - Smoothstep (Default): Smooth acceleration and deceleration, natural and balanced
-        //   1 - EaseOutBack: Fast approach with overshoot bounce effect, dynamic and lively
-        //   2 - EaseOutCubic: Fast start with smooth end, no bounce
-        //   Others - Linear: Constant speed movement, simple and direct
         SPEED_LINE_MODE = BUILDER
-                .comment("Animation easing mode for spell slot transitions",
-                        "Controls the movement animation curve when spell groups move between states",
+                .comment("Animation easing mode",
+                        "Controls movement animation curve for spell slot transitions",
                         "Available modes:",
-                        "  0 - Smoothstep: Smooth acceleration and deceleration (recommended for most users)",
-                        "  1 - EaseOutBack: Fast movement with ~20% overshoot bounce effect (dynamic, eye-catching)",
-                        "  2 - EaseOutCubic: Fast start, smooth stop, no bounce (quick and clean)",
-                        "  Other values - Linear: Constant speed (simple, no easing)",
+                        "  0 - Smoothstep: Smooth acceleration/deceleration, natural (recommended)",
+                        "  1 - EaseOutBack: Fast approach with ~20% overshoot bounce, dynamic",
+                        "  2 - EaseOutCubic: Fast start smooth stop, clean",
+                        "  Other values - Linear: Constant speed, simple",
                         "Default: 0 (Smoothstep)")
                 .defineInRange("Speed Line Mode", 0, 0, 2);
 
