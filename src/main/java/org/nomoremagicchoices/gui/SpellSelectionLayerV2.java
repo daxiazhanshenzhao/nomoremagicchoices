@@ -37,37 +37,40 @@ public class SpellSelectionLayerV2 implements ILayerState {
     @Override
     public void render(GuiGraphics context, DeltaTracker partialTick) {
         // 更新屏幕尺寸
+        updateScreenSize(context);
+
         var screenWidth = context.guiWidth();
         var screenHeight = context.guiHeight();
 
         var x = screenWidth / 2 - 200;
-        var y = screenHeight -36;
+        var y = screenHeight - 36;
 
-        renderBg(TEXTURE, context,x , y,0,0, 105, 36,105,36);
-        updateScreenSize(context);
+        // 渲染背景（带独立偏移）
+        var bgPose = context.pose();
+        bgPose.pushPose();
+        bgPose.translate(ClientConfig.BACKGROUND_X_OFFSET.get(), ClientConfig.BACKGROUND_Y_OFFSET.get(), 0);
+        renderBg(TEXTURE, context, x, y, 0, 0, 105, 36, 105, 36);
+        bgPose.popPose();
 
-
+        // 渲染法术（带独立偏移）
+        var spellPose = context.pose();
+        spellPose.pushPose();
+        spellPose.translate(ClientConfig.SPELL_X_OFFSET.get(), ClientConfig.SPELL_Y_OFFSET.get(), 0);
 
         // 获取Widget列表并渲染
         List<AbstractWight> wightList = ClientData.getScrollWightData().getScrollWights();
 
-        if (wightList == null || wightList.isEmpty()) {
-            return;
-        }
-
-        // 渲染所有Widget - 从大到小倒序渲染，让小index的Widget显示在最上层
-        for (int i = wightList.size() - 1; i >= 0; i--) {
-            AbstractWight wight = wightList.get(i);
-            if (wight != null) {
-                wight.render(context, partialTick);
+        if (wightList != null && !wightList.isEmpty()) {
+            // 渲染所有Widget - 从大到小倒序渲染，让小index的Widget显示在最上层
+            for (int i = wightList.size() - 1; i >= 0; i--) {
+                AbstractWight wight = wightList.get(i);
+                if (wight != null) {
+                    wight.render(context, partialTick);
+                }
             }
         }
-//        for (int i =0;i < wightList.size();i++){
-//            AbstractWight wight = wightList.get(i);
-//            if (wight != null) {
-//                wight.render(context, partialTick);
-//            }
-//        }
+
+        spellPose.popPose();
     }
 
     /**
@@ -81,9 +84,6 @@ public class SpellSelectionLayerV2 implements ILayerState {
             this.screenHeight = guiGraphics.guiHeight();
             this.screenWidth = guiGraphics.guiWidth();
         }
-
-
-
     }
 
 

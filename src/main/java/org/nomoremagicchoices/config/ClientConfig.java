@@ -3,25 +3,108 @@ package org.nomoremagicchoices.config;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
- * Client configuration class
- * Manages all client-side configuration options
+ * 客户端配置类
+ * 管理所有客户端的配置选项，包括UI显示、位置偏移、动画效果等
+ *
+ * 配置文件位置：config/nomoremagicchoices-client.toml
+ *
+ * @author NoMoreMagicChoices
+ * @since 1.0
  */
 public class ClientConfig {
     
     public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
     
-    // UI related configurations
+    // ========== UI 显示开关 ==========
+
+    /**
+     * 启用自定义法术选择界面
+     * - true: 使用本模组的自定义UI
+     * - false: 使用原版/Iron's Spellbooks的默认UI
+     */
     public static final ModConfigSpec.ConfigValue<Boolean> ENABLE_CUSTOM_UI;
+
+    /**
+     * 启用法术选择界面背景
+     * - true: 渲染背景图片
+     * - false: 不渲染背景（仅显示法术图标）
+     */
     public static final ModConfigSpec.ConfigValue<Boolean> ENABLE_BACKGROUND;
     
-    // Position and size configurations
-    public static final ModConfigSpec.ConfigValue<Integer> CENTER_X_OFFSET;
-    public static final ModConfigSpec.ConfigValue<Integer> CENTER_Y_OFFSET;
-    public static final ModConfigSpec.ConfigValue<Integer> FOCUS_HEIGHT;
+    // ========== 位置偏移配置 ==========
+
+    /**
+     * 背景X轴偏移量
+     * 调整法术选择背景图片的水平位置
+     * - 正值：向右移动
+     * - 负值：向左移动
+     * - 单位：像素
+     */
+    public static final ModConfigSpec.ConfigValue<Integer> BACKGROUND_X_OFFSET;
+
+    /**
+     * 背景Y轴偏移量
+     * 调整法术选择背景图片的垂直位置
+     * - 正值：向下移动
+     * - 负值：向上移动
+     * - 单位：像素
+     */
+    public static final ModConfigSpec.ConfigValue<Integer> BACKGROUND_Y_OFFSET;
+
+    /**
+     * 法术图标X轴偏移量
+     * 调整所有法术图标的水平位置（独立于背景偏移）
+     * - 正值：向右移动
+     * - 负值：向左移动
+     * - 单位：像素
+     */
+    public static final ModConfigSpec.ConfigValue<Integer> SPELL_X_OFFSET;
+
+    /**
+     * 法术图标Y轴偏移量
+     * 调整所有法术图标的垂直位置（独立于背景偏移）
+     * - 正值：向下移动
+     * - 负值：向上移动
+     * - 单位：像素
+     */
+    public static final ModConfigSpec.ConfigValue<Integer> SPELL_Y_OFFSET;
     
-    // Spell system configuration
+    // ========== 动画与交互配置 ==========
+
+    /**
+     * 聚焦状态上浮高度
+     * 当法术组获得焦点时，额外向上移动的距离
+     * - 值越大，聚焦效果越明显
+     * - 建议范围：5-20像素
+     * - 默认：10像素
+     */
+    public static final ModConfigSpec.ConfigValue<Integer> FOCUS_HEIGHT;
+
+    /**
+     * 自定义UI管理的法术数量上限
+     * 控制有多少个法术槽使用自定义UI显示
+     *
+     * 使用场景：
+     * - 默认值 8：前8个法术使用自定义UI，第9个及以后使用原版系统
+     * - 设为 0：完全禁用自定义UI，所有法术使用原版系统
+     * - 设为大值(如999)：所有法术都使用自定义UI
+     *
+     * 注意：此配置不影响实际可学习的法术数量，仅影响UI显示方式
+     */
     public static final ModConfigSpec.ConfigValue<Integer> MINE_CUSTOM_SPELL;
 
+    /**
+     * 动画缓动模式
+     * 控制法术槽在状态切换时的移动动画曲线
+     *
+     * 可选模式：
+     * - 0 (Smoothstep)    - 平滑加减速，自然流畅【推荐】
+     * - 1 (EaseOutBack)   - 快速到达并回弹约20%，活泼动感
+     * - 2 (EaseOutCubic)  - 快速启动平滑结束，干脆利落
+     * - 其他值 (Linear)   - 匀速运动，简单直接
+     *
+     * 默认：0 (Smoothstep)
+     */
     public static final ModConfigSpec.ConfigValue<Integer> SPEED_LINE_MODE;
 
     public static final ModConfigSpec SPEC;
@@ -42,25 +125,34 @@ public class ClientConfig {
                         "true: Render background",
                         "false: Do not render background")
                 .define("Enable Background", true);
-        
-        // Center point X-axis offset
-        // Horizontal position offset of the spell selection interface (relative to screen center)
-        CENTER_X_OFFSET = BUILDER
-                .comment("Spell selection interface horizontal offset",
-                        "Positive value: Offset to the right",
-                        "Negative value: Offset to the left",
+
+
+        //positon
+        BACKGROUND_X_OFFSET = BUILDER
+                .comment("Background X Offset",
+                        "Horizontal offset of the spell selection background",
                         "Unit: pixels")
-                .define("Center X Offset", -195);
-        
-        // Center point Y-axis offset
-        // Vertical position offset of the spell selection interface (relative to screen bottom)
-        CENTER_Y_OFFSET = BUILDER
-                .comment("Spell selection interface vertical offset",
-                        "Positive value: Offset upward",
-                        "Negative value: Offset downward",
+                .define("Background X Offset", 0);
+
+        BACKGROUND_Y_OFFSET = BUILDER
+                .comment("Background Y Offset",
+                        "Vertical offset of the spell selection background",
                         "Unit: pixels")
-                .define("Center Y Offset", -22);
-        
+                .define("Background Y Offset", 0);
+
+        SPELL_X_OFFSET = BUILDER
+                .comment("Spell X Offset",
+                        "Horizontal offset of the spell icons",
+                        "Unit: pixels")
+                .define("Spell X Offset", 0);
+
+        SPELL_Y_OFFSET = BUILDER
+                .comment("Spell Y Offset",
+                        "Vertical offset of the spell icons",
+                        "Unit: pixels")
+                .define("Spell Y Offset", 0);
+
+
         // Focus state height
         // Additional upward movement height when the spell group is in focus state
         FOCUS_HEIGHT = BUILDER

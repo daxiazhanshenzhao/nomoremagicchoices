@@ -24,9 +24,10 @@ public class ScrollWightData {
 
     private static final int FOCUS_HEIGHT = ClientConfig.FOCUS_HEIGHT.get();            //10
 
-
-    private static final int centerXOffset = ClientConfig.CENTER_X_OFFSET.get();        //-195
-    private static final int centerYOffset = ClientConfig.CENTER_Y_OFFSET.get();        //-22
+    private static final int centerXOffset = -195;
+    private static final int centerYOffset = -22;
+//    private static final int centerXOffset = ClientConfig.CENTER_X_OFFSET.get();        //-195
+//    private static final int centerYOffset = ClientConfig.CENTER_Y_OFFSET.get();        //-22
 
     /**
      *
