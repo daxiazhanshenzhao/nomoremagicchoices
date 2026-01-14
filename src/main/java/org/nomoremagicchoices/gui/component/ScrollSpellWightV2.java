@@ -23,6 +23,23 @@ public class ScrollSpellWightV2 extends AbstractWight{
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Nomoremagicchoices.MODID, "textures/gui/icons.png");
     private static final ResourceLocation KEY_TEXTURE = ResourceLocation.fromNamespaceAndPath(Nomoremagicchoices.MODID, "textures/gui/keys.png");
 
+    // ========== Spell Slot 相关纹理（保持不变） ==========
+    public static final BlitContext FOCUS_YELLOW = BlitContext.of(0, 0, 22, 22);
+    public static final BlitContext FOCUS_SLIVER = BlitContext.of(0, 24, 22, 22);
+
+    public static final BlitContext DOWN_YELLOW = BlitContext.of(24, 0, 22, 22);
+    public static final BlitContext DOWN_SLIVER = BlitContext.of(24, 24, 20, 20);
+
+    public static final BlitContext COOLDOWN_SQUARE = BlitContext.of(24, 73, 22, 22);
+
+    // ========== Key 按钮相关纹理 ==========
+    /** 键盘按键背景 - 左边框 (3x12) */
+    public static final BlitContext KEY_BG_LEFT = BlitContext.of(0, 32, 3, 12);
+    /** 键盘按键背景 - 中间可伸缩部分 (起始位置，宽度动态) */
+    public static final BlitContext KEY_BG_MIDDLE = BlitContext.of(16, 32, 0, 12);
+    /** 键盘按键背景 - 右边框 (3x12) */
+    public static final BlitContext KEY_BG_RIGHT = BlitContext.of(13, 32, 3, 12);
+
     // 法术槽间隔常量
     /** Down状态下的法术槽水平间隔（像素） */
     public static final int SPELL_SPACING_DOWN = 20;
@@ -146,29 +163,52 @@ public class ScrollSpellWightV2 extends AbstractWight{
 
     @Override
     public void renderSlot(GuiGraphics context,SpellData spell,int x,int y){
-        //框
-        context.blit(TEXTURE, x, y, 22, 84, 22, 22);
+        // 获取冷却百分比
+        float cooldownPercent = ClientMagicData.getCooldownPercent(spell.getSpell());
+
+        //框：渲染基础边框（始终使用DOWN_YELLOW，位置偏移+1）
+        context.blit(TEXTURE, x + 1, y + 1,
+                DOWN_YELLOW.uOffset(), DOWN_YELLOW.vOffset(),
+                DOWN_YELLOW.width(), DOWN_YELLOW.height());
+
         //法术图标
         context.blit(spell.getSpell().getSpellIconResource(),
                 x + 3, y + 3,
                 0, 0, 16, 16, 16, 16);
+
         //绘制冷却条
-        float cooldownPercent = ClientMagicData.getCooldownPercent(spell.getSpell());
         if (cooldownPercent > 0) {
             RenderSystem.enableBlend();
             int pixels = (int) (16 * cooldownPercent + 1.0F);
-            if (center.state().equals(State.Focus)) {
-                context.blit(TEXTURE, x, y, 66, 84, 22, 22);
-            }
 
-            context.blit(TEXTURE, x + 3, y + 3 + 16 - pixels, 47, 87 + 16 - pixels, 16, pixels);
+            // 绘制冷却进度条（使用新的COOLDOWN_SQUARE贴图）
+            context.blit(TEXTURE, x + 3, y + 3 + 16 - pixels,
+                    COOLDOWN_SQUARE.uOffset() + 3, COOLDOWN_SQUARE.vOffset() + 3 + 16 - pixels,
+                    16, pixels);
         }
-        //绘制冷却框
-        if (cooldownPercent <=0){
+
+        //绘制顶层框（根据状态和冷却情况）
+        if (cooldownPercent <= 0){
+            // 无冷却时：法术就绪，显示金色
             if (center.state().equals(State.Focus)) {
-                context.blit(TEXTURE, x, y, 88, 84, 22, 22);
-            }else {
-                context.blit(TEXTURE, x +1, y + 1, 156, 85, 20, 20);
+                // Focus状态：YELLOW边框（就绪+高亮）
+                context.blit(TEXTURE, x, y,
+                        FOCUS_YELLOW.uOffset(), FOCUS_YELLOW.vOffset(),
+                        FOCUS_YELLOW.width(), FOCUS_YELLOW.height());
+            }
+            // Down状态：已经在基础边框中渲染了DOWN_YELLOW，不需要额外渲染
+        } else {
+            // 冷却中：显示银色边框
+            if (center.state().equals(State.Focus)) {
+                // Focus状态下的冷却：使用FOCUS_SLIVER
+                context.blit(TEXTURE, x, y,
+                        FOCUS_SLIVER.uOffset(), FOCUS_SLIVER.vOffset(),
+                        FOCUS_SLIVER.width(), FOCUS_SLIVER.height());
+            } else {
+                // 非Focus状态下的冷却：使用DOWN_SLIVER
+                context.blit(TEXTURE, x + 1, y + 1,
+                        DOWN_SLIVER.uOffset(), DOWN_SLIVER.vOffset(),
+                        DOWN_SLIVER.width(), DOWN_SLIVER.height());
             }
         }
     }
@@ -182,7 +222,69 @@ public class ScrollSpellWightV2 extends AbstractWight{
      * @param slotIndex 槽位索引（0-3）
      */
     public void renderSlot(GuiGraphics context, SpellData spell, int x, int y, int slotIndex){
-        // 获取当前手持状态
+        // 获取当前手持状态和冷却百分比
+        boolean shouldRenderFocusBorder = isShouldRenderFocusBorder(slotIndex);
+        float cooldownPercent = ClientMagicData.getCooldownPercent(spell.getSpell());
+
+        //框：渲染基础边框
+        if (shouldRenderFocusBorder) {
+            // EmptyHand状态且是当前选中的法术：使用FOCUS_YELLOW边框（更粗的金色边框）
+            context.blit(TEXTURE, x, y,
+                    FOCUS_YELLOW.uOffset(), FOCUS_YELLOW.vOffset(),
+                    FOCUS_YELLOW.width(), FOCUS_YELLOW.height());
+        } else {
+            // 渲染普通边框（位置偏移+1）
+            context.blit(TEXTURE, x + 1, y + 1,
+                    DOWN_YELLOW.uOffset(), DOWN_YELLOW.vOffset(),
+                    DOWN_YELLOW.width(), DOWN_YELLOW.height());
+        }
+
+        //法术图标
+        context.blit(spell.getSpell().getSpellIconResource(),
+                x + 3, y + 3,
+                0, 0, 16, 16, 16, 16);
+
+        //绘制冷却条
+        if (cooldownPercent > 0) {
+            RenderSystem.enableBlend();
+            int pixels = (int) (16 * cooldownPercent + 1.0F);
+
+            // 绘制冷却进度条（使用新的COOLDOWN_SQUARE贴图）
+            context.blit(TEXTURE, x + 3, y + 3 + 16 - pixels,
+                    COOLDOWN_SQUARE.uOffset() + 3, COOLDOWN_SQUARE.vOffset() + 3 + 16 - pixels,
+                    16, pixels);
+        }
+
+        //绘制顶层框（根据冷却状态）
+        if (cooldownPercent <= 0){
+            // 无冷却时：法术就绪，显示金色
+            if (!shouldRenderFocusBorder) {
+                if (center.state().equals(State.Focus)) {
+                    // Focus状态：YELLOW边框（就绪+高亮）
+                    context.blit(TEXTURE, x, y,
+                            FOCUS_YELLOW.uOffset(), FOCUS_YELLOW.vOffset(),
+                            FOCUS_YELLOW.width(), FOCUS_YELLOW.height());
+                }
+                // Down状态且非选中：已经在基础边框中渲染了DOWN_YELLOW，不需要额外渲染
+            }
+            // shouldRenderFocusBorder=true 时，已经在上面渲染了FOCUS_YELLOW，不需要额外渲染
+        } else {
+            // 冷却中：显示银色边框
+            if (center.state().equals(State.Focus) || shouldRenderFocusBorder) {
+                // Focus状态或选中状态下的冷却：使用FOCUS_SLIVER
+                context.blit(TEXTURE, x, y,
+                        FOCUS_SLIVER.uOffset(), FOCUS_SLIVER.vOffset(),
+                        FOCUS_SLIVER.width(), FOCUS_SLIVER.height());
+            } else {
+                // 非Focus状态下的冷却：使用DOWN_SLIVER
+                context.blit(TEXTURE, x + 1, y + 1,
+                        DOWN_SLIVER.uOffset(), DOWN_SLIVER.vOffset(),
+                        DOWN_SLIVER.width(), DOWN_SLIVER.height());
+            }
+        }
+    }
+
+    private boolean isShouldRenderFocusBorder(int slotIndex) {
         SpellSelectionState handState = ClientHandData.getState();
         // 获取当前选中的法术索引（相对索引 0-3）
         int selectIndex = SpellGroupData.getSelectIndex();
@@ -194,46 +296,7 @@ public class ScrollSpellWightV2 extends AbstractWight{
                                          && handState.equals(SpellSelectionState.EmptyHand)
                                          && slotIndex == selectIndex
                                          && groupIndex == SpellGroupData.getCurrentGroupIndex();
-
-        //框：如果是EmptyHand状态且是当前选中的法术，使用Focus边框
-        if (shouldRenderFocusBorder) {
-            // 渲染Focus边框（更粗的金色边框）
-            context.blit(TEXTURE, x, y, 88, 84, 22, 22);
-        } else {
-            // 渲染普通边框
-            context.blit(TEXTURE, x, y, 22, 84, 22, 22);
-        }
-
-        //法术图标
-        context.blit(spell.getSpell().getSpellIconResource(),
-                x + 3, y + 3,
-                0, 0, 16, 16, 16, 16);
-
-        //绘制冷却条
-        float cooldownPercent = ClientMagicData.getCooldownPercent(spell.getSpell());
-        if (cooldownPercent > 0) {
-            RenderSystem.enableBlend();
-            int pixels = (int) (16 * cooldownPercent + 1.0F);
-
-            // Focus状态或EmptyHand选中状态下，冷却框也要特殊处理
-            if (center.state().equals(State.Focus) || shouldRenderFocusBorder) {
-                context.blit(TEXTURE, x, y, 66, 84, 22, 22);
-            }
-
-            context.blit(TEXTURE, x + 3, y + 3 + 16 - pixels, 47, 87 + 16 - pixels, 16, pixels);
-        }
-
-        //绘制冷却框（无冷却时）
-        if (cooldownPercent <= 0){
-            // 不需要再次渲染Focus边框，因为上面已经渲染过了
-            if (!shouldRenderFocusBorder) {
-                if (center.state().equals(State.Focus)) {
-                    context.blit(TEXTURE, x, y, 88, 84, 22, 22);
-                } else {
-                    context.blit(TEXTURE, x + 1, y + 1, 156, 85, 20, 20);
-                }
-            }
-        }
+        return shouldRenderFocusBorder;
     }
 
     public void renderKey(GuiGraphics context, int slotIndex, int x, int y) {
@@ -283,10 +346,21 @@ public class ScrollSpellWightV2 extends AbstractWight{
                 // 计算按键背景的起始X坐标（居中对齐：法术槽中心点 - 总宽度的一半）
                 int keyBackgroundX = x + 11 - totalBackgroundWidth / 2;
 
-                // 绘制按键背景：左边框（3px） + 中间可伸缩部分 + 右边框（3px）
-                context.blit(KEY_TEXTURE, keyBackgroundX, y, 0, 32, 3, 12);                // 左边框
-                context.blit(KEY_TEXTURE, keyBackgroundX + 3, y, 16, 32, textWidth, 12);   // 中间部分
-                context.blit(KEY_TEXTURE, keyBackgroundX + 3 + textWidth, y, 13, 32, 3, 12); // 右边框
+                // 绘制按键背景：使用 BlitContext 常量
+                // 左边框（3px）
+                context.blit(KEY_TEXTURE, keyBackgroundX, y,
+                        KEY_BG_LEFT.uOffset(), KEY_BG_LEFT.vOffset(),
+                        KEY_BG_LEFT.width(), KEY_BG_LEFT.height());
+
+                // 中间部分（动态宽度）
+                context.blit(KEY_TEXTURE, keyBackgroundX + 3, y,
+                        KEY_BG_MIDDLE.uOffset(), KEY_BG_MIDDLE.vOffset(),
+                        textWidth, KEY_BG_MIDDLE.height());
+
+                // 右边框（3px）
+                context.blit(KEY_TEXTURE, keyBackgroundX + 3 + textWidth, y,
+                        KEY_BG_RIGHT.uOffset(), KEY_BG_RIGHT.vOffset(),
+                        KEY_BG_RIGHT.width(), KEY_BG_RIGHT.height());
 
                 // 绘制文字（左边框后直接开始）
                 context.drawString(font, keyName, keyBackgroundX + 3, y + 2, 0xFFFFFF);
