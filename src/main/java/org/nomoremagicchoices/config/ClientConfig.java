@@ -190,7 +190,7 @@ public class ClientConfig {
                         "  2 - EaseOutCubic: Fast start smooth stop, clean",
                         "  Other values - Linear: Constant speed, simple",
                         "Default: 0 (Smoothstep)")
-                .defineInRange("Speed Line Mode", 0, 0, 2);
+                .defineInRange("Speed Line Mode", 1, 0, 2);
 
         SPEC = BUILDER.build();
     }
