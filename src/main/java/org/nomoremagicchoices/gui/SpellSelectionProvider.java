@@ -61,6 +61,7 @@ public class SpellSelectionProvider implements LayeredDraw.Layer {
      */
     public static boolean customGui(){
         if (ClientMagicData.getSpellSelectionManager() == null) return false;
+        if (ClientMagicData.getSpellSelectionManager().getAllSpells().isEmpty()) return false;
 
         return ClientMagicData.getSpellSelectionManager().getAllSpells().size() < ClientConfig.MINE_CUSTOM_SPELL.get();
     }
