@@ -117,7 +117,6 @@ public class ClientInputHandle {
                     int slotIndexInGroup = keys.indexOf(key);
                     int first = currentGroupIndex * 4;
                     int i = slotIndexInGroup + first;
-                    Nomoremagicchoices.LOGGER.info("触发了1次");
                     // 发送快速施法包到服务器
                     PacketDistributor.sendToServer(new QuickCastPacket(i));
                     break;
@@ -160,7 +159,6 @@ public class ClientInputHandle {
                     int slotIndexInGroup = keys.indexOf(key);
                     int first = currentGroupIndex * 4;
                     int i = slotIndexInGroup + first;
-                    Nomoremagicchoices.LOGGER.info("数字键触发技能: " + (slotIndexInGroup + 1));
                     // 发送快速施法包到服务器
                     PacketDistributor.sendToServer(new QuickCastPacket(i));
                 }

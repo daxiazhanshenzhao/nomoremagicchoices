@@ -38,7 +38,7 @@ public class MixinSkillCombat {
         boolean shouldIntercept = ClientInputHandle.handleNumberKey();
 
         if (shouldIntercept) {
-            Nomoremagicchoices.LOGGER.info("拦截了物品栏切换，索引: " + index);
+
         }
 
         // 返回false表示拦截（不执行原版物品栏切换），返回true表示允许原版逻辑
