@@ -40,4 +40,9 @@ public class KeyState {
     public KeyMapping getKey() {
         return key;
     }
+
+    public boolean isNumberKey() {
+        int keyCode = key.getKey().getValue();
+        return keyCode >= 49 && keyCode <= 57; // 49='1', 57='9'
+    }
 }

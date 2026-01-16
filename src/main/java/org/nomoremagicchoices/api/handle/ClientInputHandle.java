@@ -15,6 +15,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.nomoremagicchoices.Nomoremagicchoices;
 import org.nomoremagicchoices.api.init.TagInit;
 import org.nomoremagicchoices.api.selection.SpellGroupData;
 import org.nomoremagicchoices.gui.SpellSelectionProvider;
@@ -110,13 +111,13 @@ public class ClientInputHandle {
 
         for (KeyState key : keys){
             while(key.getKey().consumeClick()){
-                if (hasWeapon && SpellSelectionProvider.customGui()){
+                if (hasWeapon && SpellSelectionProvider.customGui() && !key.isNumberKey()){
                     // 使用 SpellGroupData 获取当前组索引，确保与 ClientScrollData 同步
                     int currentGroupIndex = SpellGroupData.getCurrentGroupIndex();
                     int slotIndexInGroup = keys.indexOf(key);
                     int first = currentGroupIndex * 4;
                     int i = slotIndexInGroup + first;
-
+                    Nomoremagicchoices.LOGGER.info("触发了1次");
                     // 发送快速施法包到服务器
                     PacketDistributor.sendToServer(new QuickCastPacket(i));
                     break;
@@ -124,6 +125,52 @@ public class ClientInputHandle {
             }
         }
     }
+
+    /**
+     * 检查是否应该拦截数字键切换物品栏，并处理数字键技能释放
+     * @return true 表示应该拦截物品栏切换（允许技能释放），false 表示允许原版物品栏切换
+     */
+    public static boolean handleNumberKey(){
+        var mc = Minecraft.getInstance();
+        if (mc.player == null) {
+            return false;
+        }
+
+        // 只有在持有武器、自定义GUI启用、且技能键绑定到数字键时才处理
+        if (!hasWeapon || !SpellSelectionProvider.customGui() || !ModKeyMapping.isAnySkillKeyBoundToNumber()) {
+            return false;
+        }
+
+        // 更新按键状态
+        update();
+
+        // 遍历所有技能按键，处理数字键的技能释放
+        boolean hasNumberKeyPressed = false;
+        for (KeyState key : keys){
+            // 只处理绑定到数字键的技能
+            if (key.isNumberKey()) {
+                // 检查是否有按键事件（不消耗，只检查）
+                if (key.getKey().isDown()) {
+                    hasNumberKeyPressed = true;
+                }
+
+                // 消耗按键事件并释放技能
+                while(key.getKey().consumeClick()){
+                    int currentGroupIndex = SpellGroupData.getCurrentGroupIndex();
+                    int slotIndexInGroup = keys.indexOf(key);
+                    int first = currentGroupIndex * 4;
+                    int i = slotIndexInGroup + first;
+                    Nomoremagicchoices.LOGGER.info("数字键触发技能: " + (slotIndexInGroup + 1));
+                    // 发送快速施法包到服务器
+                    PacketDistributor.sendToServer(new QuickCastPacket(i));
+                }
+            }
+        }
+
+        // 如果有任何数字键被按下，就拦截物品栏切换
+        return hasNumberKeyPressed;
+    }
+
 
     public static KeyState getKeyState(KeyMapping key){
         return new KeyState(key);
