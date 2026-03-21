@@ -1,7 +1,6 @@
 package org.nomoremagicchoices.player;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.redspace.ironsspellbooks.player.KeyState;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.player.Input;
 import net.neoforged.api.distmarker.Dist;
