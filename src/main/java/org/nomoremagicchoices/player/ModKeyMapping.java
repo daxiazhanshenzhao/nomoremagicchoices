@@ -25,7 +25,7 @@ public class ModKeyMapping {
     public static final Lazy<KeyMapping> SKILL_3 = Lazy.of(() -> new SkillKey("key.nomoremagicchoices.skill3", 3,51, SKILL_CATEGORY));
     public static final Lazy<KeyMapping> SKILL_4 = Lazy.of(() -> new SkillKey("key.nomoremagicchoices.skill4", 4,52, SKILL_CATEGORY));
 
-    public static final Lazy<KeyMapping> CHANG_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.change_group", InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_R, SKILL_CATEGORY));
+    public static final Lazy<KeyMapping> CHANG_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.change_group", InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_X, SKILL_CATEGORY));
     public static final Lazy<KeyMapping> NEXT_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.next_group", InputConstants.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_5, SKILL_CATEGORY)); // Mouse Button 5
     public static final Lazy<KeyMapping> PREV_GROUP = Lazy.of(() -> new KeyMapping("key.nomoremagicchoices.prev_group", InputConstants.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_4, SKILL_CATEGORY)); // Mouse Button 4
 
